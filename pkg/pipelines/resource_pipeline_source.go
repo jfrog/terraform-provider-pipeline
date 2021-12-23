@@ -39,42 +39,42 @@ const pipelineSourcesUrl = "pipelines/api/v1/pipelinesources"
 func pipelineSourceResource() *schema.Resource {
 
 	var pipelineSourceSchema = map[string]*schema.Schema{
-		"projectId": {
+		"project_id": {
 			Type:         schema.TypeInt,
 			Required:     true,
 			ValidateFunc: validation.IntAtLeast(0),
 			Description:  "Id of the project where the pipeline source will live.",
 		},
-		"projectIntegrationId": {
+		"project_integration_id": {
 			Type:         schema.TypeInt,
 			Required:     true,
 			ValidateFunc: validation.IntAtLeast(0),
 			Description:  "Id of the project Github integration to use to create the pipeline source.",
 		},
-		"repositoryFullName": {
+		"repository_full_name": {
 			Type:         schema.TypeString,
 			Required:     true,
 			ValidateFunc: validation.StringIsNotEmpty,
 			Description:  "The full name of the Git repository including the user/organization as it appears in a Git clone command. For example, myOrg/myProject.",
 		},
-		"fileFilter": {
+		"file_filter": {
 			Type:         schema.TypeString,
 			Required:     true,
 			ValidateFunc: validation.StringIsNotEmpty,
 			Description:  "A regular expression to determine which files to include in pipeline sync (the YML files), with default pipelines.yml. If a templateId was provided, it must be values.yml.",
 		},
-		"isMultiBranch": {
+		"is_multi_branch": {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Description: "True if the pipeline source is to be a multi-branch pipeline source. Otherwise, it will be a single-branch pipeline source.",
 		},
-		"branchExcludePattern": {
+		"branch_exclude_pattern": {
 			Type:         schema.TypeString,
 			Optional:     true,
 			ValidateFunc: validation.StringIsNotEmpty,
 			Description:  "For multi-branch pipeline sources, a regular expression of the branches to exclude.",
 		},
-		"branchIncludePattern": {
+		"branch_include_pattern": {
 			Type:         schema.TypeString,
 			Optional:     true,
 			ValidateFunc: validation.StringIsNotEmpty,
@@ -88,7 +88,7 @@ func pipelineSourceResource() *schema.Resource {
 			},
 			Description: "In a project, an array of environment names in which this pipeline source will be.",
 		},
-		"templateId": {
+		"template_id": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ValidateFunc: validation.IntAtLeast(0),
@@ -100,16 +100,16 @@ func pipelineSourceResource() *schema.Resource {
 		d := &ResourceData{data}
 
 		pipelineSource := PipelineSource{
-			ProjectId:            d.getInt("projectId"),
-			ProjectIntegrationId: d.getInt("projectIntegrationId"),
-			RepositoryFullName:   d.getString("repositoryFullName"),
+			ProjectId:            d.getInt("project_id"),
+			ProjectIntegrationId: d.getInt("projectIntegration_id"),
+			RepositoryFullName:   d.getString("repository_full_name"),
 			Branch:               d.getString("branch"),
-			FileFilter:           d.getString("fileFilter"),
-			IsMultiBranch:        d.getBool("isMultiBranch"),
-			BranchExcludePattern: d.getString("branchExcludePattern"),
-			BranchIncludePattern: d.getString("branchIncludePattern"),
+			FileFilter:           d.getString("file_filter"),
+			IsMultiBranch:        d.getBool("is_multi_branch"),
+			BranchExcludePattern: d.getString("branch_exclude_pattern"),
+			BranchIncludePattern: d.getString("branch_include_pattern"),
 			Environments:         d.getList("environments"),
-			TemplateId:           d.getInt("templateId"),
+			TemplateId:           d.getInt("template_id"),
 		}
 		return pipelineSource, nil
 	}
@@ -118,16 +118,16 @@ func pipelineSourceResource() *schema.Resource {
 		var errors []error
 		setValue := mkLens(d)
 
-		errors = setValue("projectId", pipelineSource.ProjectId)
-		setValue("projectIntegrationId", pipelineSource.ProjectIntegrationId)
-		setValue("repositoryFullName", pipelineSource.RepositoryFullName)
+		errors = setValue("project_id", pipelineSource.ProjectId)
+		setValue("project_integration_id", pipelineSource.ProjectIntegrationId)
+		setValue("repository_full_name", pipelineSource.RepositoryFullName)
 		setValue("branch", pipelineSource.Branch)
-		setValue("fileFilter", pipelineSource.FileFilter)
-		setValue("isMultiBranch", pipelineSource.IsMultiBranch)
-		setValue("branchExcludePattern", pipelineSource.BranchExcludePattern)
-		setValue("branchIncludePattern", pipelineSource.BranchIncludePattern)
+		setValue("file_filter", pipelineSource.FileFilter)
+		setValue("is_multi_branch", pipelineSource.IsMultiBranch)
+		setValue("branch_exclude_pattern", pipelineSource.BranchExcludePattern)
+		setValue("branch_include_pattern", pipelineSource.BranchIncludePattern)
 		setValue("environments", pipelineSource.Environments)
-		setValue("templateId", pipelineSource.TemplateId)
+		setValue("template_id", pipelineSource.TemplateId)
 
 		if len(errors) > 0 {
 			return diag.Errorf("failed to pack pipeline source %q", errors)
