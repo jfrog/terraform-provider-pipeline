@@ -113,7 +113,7 @@ func checkArtifactoryLicense(client *resty.Client) error {
 		Get("/artifactory/api/system/licenses")
 
 	if err != nil {
-		return fmt.Errorf("Failed to check for license. %s", err)
+		return fmt.Errorf("failed to check for license. %s", err)
 	}
 
 	var licenseType string
@@ -124,7 +124,7 @@ func checkArtifactoryLicense(client *resty.Client) error {
 	}
 
 	if matched, _ := regexp.MatchString(`Enterprise`, licenseType); !matched {
-		return fmt.Errorf("Artifactory Pipelines requires Enterprise license to work with Terraform!")
+		return fmt.Errorf("artifactory Pipelines requires Enterprise license to work with Terraform")
 	}
 
 	return nil
