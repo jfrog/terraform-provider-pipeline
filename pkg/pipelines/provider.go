@@ -44,7 +44,7 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"pipelines": pipelinesResource(),
+			"pipeline_source": pipelineSourceResource(),
 		},
 	}
 
@@ -58,10 +58,6 @@ func Provider() *schema.Provider {
 	}
 
 	return p
-}
-
-type PipelinesClient struct {
-	Get func(id string) (Pipelines, error)
 }
 
 func buildResty(URL string) (*resty.Client, error) {
