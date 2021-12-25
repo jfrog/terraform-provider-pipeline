@@ -44,7 +44,8 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"pipeline_source": pipelineSourceResource(),
+			"pipeline_source":              pipelineSourceResource(),
+			"pipeline_project_integration": pipelineProjectIntegrationResource(),
 		},
 	}
 

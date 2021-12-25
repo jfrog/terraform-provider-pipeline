@@ -3,11 +3,11 @@ terraform {
   required_providers {
     artifactory = {
       source  = "registry.terraform.io/jfrog/artifactory"
-      version = "..1"
+      version = "0.0.2"
     }
     project = {
       source  = "registry.terraform.io/jfrog/project"
-      version = "..1"
+      version = "0.0.2"
     }
   }
 }

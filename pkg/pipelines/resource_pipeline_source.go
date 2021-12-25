@@ -16,17 +16,18 @@ import (
 // Project GET {{ host }}/access/api/v1/projects/{{prjKey}}/
 //GET {{ host }}/artifactory/api/repositories/?prjKey={{prjKey}}
 type PipelineSource struct {
-	ProjectId int `json:"projectId"`
 	//Project                   string          `json:"project"`
+	Name                 string   `json:"name"`
+	ProjectId            int      `json:"projectId"`
 	ProjectIntegrationId int      `json:"projectIntegrationId"`
-	RepositoryFullName   string   `json:"repositoryFullName"`
-	Branch               string   `json:"branch"`
+	RepositoryFullName   string   `json:"repositoryFullName,omitempty"`
+	Branch               string   `json:"branch,omitempty"`
 	FileFilter           string   `json:"fileFilter"`
-	IsMultiBranch        bool     `json:"isMultiBranch"`
-	BranchExcludePattern string   `json:"branchExcludePattern"`
-	BranchIncludePattern string   `json:"branchIncludePattern"`
-	Environments         []string `json:"environments"`
-	TemplateId           int      `json:"templateId"`
+	IsMultiBranch        bool     `json:"isMultiBranch,omitempty"`
+	BranchExcludePattern string   `json:"branchExcludePattern,omitempty"`
+	BranchIncludePattern string   `json:"branchIncludePattern,omitempty"`
+	Environments         []string `json:"environments,omitempty"`
+	TemplateId           int      `json:"templateId,omitempty"`
 	ID                   int      `json:"id,omitempty"`
 }
 
@@ -39,6 +40,12 @@ const pipelineSourcesUrl = "pipelines/api/v1/pipelinesources"
 func pipelineSourceResource() *schema.Resource {
 
 	var pipelineSourceSchema = map[string]*schema.Schema{
+		"name": {
+			Type:         schema.TypeString,
+			Required:     true,
+			ValidateFunc: validation.StringIsNotEmpty,
+			Description:  "The name of the pipeline source. Should be prefixed with the project key",
+		},
 		"project_id": {
 			Type:         schema.TypeInt,
 			Required:     true,
@@ -53,7 +60,7 @@ func pipelineSourceResource() *schema.Resource {
 		},
 		"repository_full_name": {
 			Type:         schema.TypeString,
-			Required:     true,
+			Optional:     true,
 			ValidateFunc: validation.StringIsNotEmpty,
 			Description:  "The full name of the Git repository including the user/organization as it appears in a Git clone command. For example, myOrg/myProject.",
 		},
@@ -67,6 +74,12 @@ func pipelineSourceResource() *schema.Resource {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Description: "True if the pipeline source is to be a multi-branch pipeline source. Otherwise, it will be a single-branch pipeline source.",
+		},
+		"branch": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validation.StringIsNotEmpty,
+			Description:  "For single branch pipeline sources. Name of branch that has the pipeline definition.",
 		},
 		"branch_exclude_pattern": {
 			Type:         schema.TypeString,
@@ -101,7 +114,8 @@ func pipelineSourceResource() *schema.Resource {
 
 		pipelineSource := PipelineSource{
 			ProjectId:            d.getInt("project_id"),
-			ProjectIntegrationId: d.getInt("projectIntegration_id"),
+			Name:                 d.getString("name"),
+			ProjectIntegrationId: d.getInt("project_integration_id"),
 			RepositoryFullName:   d.getString("repository_full_name"),
 			Branch:               d.getString("branch"),
 			FileFilter:           d.getString("file_filter"),
@@ -119,6 +133,7 @@ func pipelineSourceResource() *schema.Resource {
 		setValue := mkLens(d)
 
 		errors = setValue("project_id", pipelineSource.ProjectId)
+		setValue("name", pipelineSource.Name)
 		setValue("project_integration_id", pipelineSource.ProjectIntegrationId)
 		setValue("repository_full_name", pipelineSource.RepositoryFullName)
 		setValue("branch", pipelineSource.Branch)
