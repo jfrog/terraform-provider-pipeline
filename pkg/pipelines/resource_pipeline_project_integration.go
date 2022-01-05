@@ -18,7 +18,8 @@ import (
 type ProjectIntegration struct {
 	//Project                   string          `json:"project"`
 	Name                  string           `json:"name"`
-	ProjectId             int              `json:"projectId"`
+	ProjectId             int              `json:"projectId,omitempty"`
+	Project               Project          `json:"project,omitempty"`
 	MasterIntegrationId   int              `json:"masterIntegrationId"`
 	MasterIntegrationName string           `json:"masterIntegrationName"`
 	FormJSONValues        []FormJSONValues `json:"formJSONValues"`
@@ -32,11 +33,12 @@ type FormJSONValues struct {
 	Value string `json:"value"`
 }
 
-const projectIntegrationsUrl = "pipelines/api/v1/projectintegrations"
+type Project struct {
+	Key  string `json:"key,omitempty"`
+	Name string `json:"name,omitempty"`
+}
 
-// func verifyProjectIntegration(id string, request *resty.Request) (*resty.Response, error) {
-// 	return request.Head(pipelinesSourcesUrl + id)
-// }
+const projectIntegrationsUrl = "pipelines/api/v1/projectintegrations"
 
 func pipelineProjectIntegrationResource() *schema.Resource {
 
@@ -47,11 +49,20 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			ValidateFunc: validation.StringIsNotEmpty,
 			Description:  "The name of the project integration. Should be prefixed with the project key",
 		},
+
 		"project_id": {
 			Type:         schema.TypeInt,
-			Required:     true,
+			Optional:     true,
 			ValidateFunc: validation.IntAtLeast(0),
 			Description:  "Id of the project.",
+		},
+		"project": {
+			Type:     schema.TypeMap,
+			Optional: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Description: "An object containing a project name as an alternative to projectId.",
 		},
 		"master_integration_id": {
 			Type:         schema.TypeInt,
@@ -82,7 +93,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 					},
 				},
 			},
-			Description: "multiple objects with the values for the integration.",
+			Description: "Multiple objects with the values for the integration.",
 		},
 		"environments": {
 			Type:     schema.TypeList,
@@ -97,6 +108,26 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			Optional:    true,
 			Description: "Set this as false to create a Pipelines integration.",
 		},
+	}
+
+	var unpackProject = func(d *ResourceData, key string) Project {
+		var project Project
+		input := d.Get(key).(map[string]interface{})
+		project.Key = input["key"].(string)
+		project.Name = input["name"].(string)
+
+		return project
+	}
+
+	var packProject = func(d *schema.ResourceData, schemaKey string, project Project) []error {
+		var errors []error
+		log.Println("[DEBUG] packProject", project)
+		if (Project{}) == project {
+			return errors
+		}
+		setValue := mkLens(d)
+		errors = append(errors, setValue(schemaKey, project)...)
+		return errors
 	}
 
 	var unpackFormJSONValues = func(d *ResourceData, key string) []FormJSONValues {
@@ -137,6 +168,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			MasterIntegrationName: d.getString("master_integration_name"),
 			Environments:          d.getList("environments"),
 			IsInternal:            d.getBool("is_internal"),
+			Project:               unpackProject(d, "project"),
 			FormJSONValues:        unpackFormJSONValues(d, "form_json_values"),
 		}
 		return projectIntegration, nil
@@ -147,13 +179,14 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		setValue := mkLens(d)
 
 		errors = setValue("project_id", projectIntegration.ProjectId)
-		setValue("name", projectIntegration.Name)
-		setValue("project_id", projectIntegration.ProjectId)
-		setValue("master_integration_id", projectIntegration.MasterIntegrationId)
-		setValue("master_integration_id", projectIntegration.MasterIntegrationName)
-		setValue("environments", projectIntegration.Environments)
-		setValue("is_internal", projectIntegration.IsInternal)
-		errors = packFormJSONValues(d, "form_json_values", projectIntegration.FormJSONValues)
+		errors = append(errors, setValue("name", projectIntegration.Name)...)
+		errors = append(errors, setValue("project_id", projectIntegration.ProjectId)...)
+		errors = append(errors, setValue("master_integration_id", projectIntegration.MasterIntegrationId)...)
+		errors = append(errors, setValue("master_integration_name", projectIntegration.MasterIntegrationName)...)
+		errors = append(errors, setValue("environments", projectIntegration.Environments)...)
+		errors = append(errors, setValue("is_internal", projectIntegration.IsInternal)...)
+		errors = append(errors, packProject(d, "project", projectIntegration.Project)...)
+		errors = append(errors, packFormJSONValues(d, "form_json_values", projectIntegration.FormJSONValues)...)
 
 		if len(errors) > 0 {
 			return diag.Errorf("failed to pack project integration %q", errors)
@@ -163,13 +196,16 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 	}
 
 	var readProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
+		log.Printf("[DEBUG] readProjectIntegration")
 		projectIntegration := ProjectIntegration{}
-		_, err := m.(*resty.Client).R().
+		resp, err := m.(*resty.Client).R().
 			SetResult(&projectIntegration).
 			Get(projectIntegrationsUrl + "/" + data.Id())
+		log.Println("[DEBUG] projectIntegration body: ", string(json.RawMessage(resp.Body())))
 		if err != nil {
 			return diag.FromErr(err)
 		}
+		log.Println("[DEBUG] projectIntegration Obj: ", projectIntegration)
 		return packProjectIntegration(data, projectIntegration)
 	}
 
@@ -242,6 +278,6 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		},
 
 		Schema:      projectIntegrationSchema,
-		Description: "Provides an Artifactory Pipeline Source resource.",
+		Description: "Provides an Jfrog Pipelines Project Integration resource.",
 	}
 }

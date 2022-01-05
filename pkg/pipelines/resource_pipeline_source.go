@@ -133,16 +133,16 @@ func pipelineSourceResource() *schema.Resource {
 		setValue := mkLens(d)
 
 		errors = setValue("project_id", pipelineSource.ProjectId)
-		setValue("name", pipelineSource.Name)
-		setValue("project_integration_id", pipelineSource.ProjectIntegrationId)
-		setValue("repository_full_name", pipelineSource.RepositoryFullName)
-		setValue("branch", pipelineSource.Branch)
-		setValue("file_filter", pipelineSource.FileFilter)
-		setValue("is_multi_branch", pipelineSource.IsMultiBranch)
-		setValue("branch_exclude_pattern", pipelineSource.BranchExcludePattern)
-		setValue("branch_include_pattern", pipelineSource.BranchIncludePattern)
-		setValue("environments", pipelineSource.Environments)
-		setValue("template_id", pipelineSource.TemplateId)
+		errors = append(errors, setValue("name", pipelineSource.Name)...)
+		errors = append(errors, setValue("project_integration_id", pipelineSource.ProjectIntegrationId)...)
+		errors = append(errors, setValue("repository_full_name", pipelineSource.RepositoryFullName)...)
+		errors = append(errors, setValue("branch", pipelineSource.Branch)...)
+		errors = append(errors, setValue("file_filter", pipelineSource.FileFilter)...)
+		errors = append(errors, setValue("is_multi_branch", pipelineSource.IsMultiBranch)...)
+		errors = append(errors, setValue("branch_exclude_pattern", pipelineSource.BranchExcludePattern)...)
+		errors = append(errors, setValue("branch_include_pattern", pipelineSource.BranchIncludePattern)...)
+		errors = append(errors, setValue("environments", pipelineSource.Environments)...)
+		errors = append(errors, setValue("template_id", pipelineSource.TemplateId)...)
 
 		if len(errors) > 0 {
 			return diag.Errorf("failed to pack pipeline source %q", errors)
@@ -172,6 +172,7 @@ func pipelineSourceResource() *schema.Resource {
 		}
 
 		resp, err := m.(*resty.Client).R().SetBody(pipelineSource).Post(pipelineSourcesUrl)
+		log.Printf("[DEBUG] %+v\n", resp.Body())
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -231,6 +232,6 @@ func pipelineSourceResource() *schema.Resource {
 		},
 
 		Schema:      pipelineSourceSchema,
-		Description: "Provides an Artifactory Pipeline Source resource.",
+		Description: "Provides an Jfrog Pipelines Pipeline Source resource.",
 	}
 }
