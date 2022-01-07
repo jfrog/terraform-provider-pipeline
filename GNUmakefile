@@ -1,12 +1,11 @@
 TEST?=./...
 TARGET_ARCH?=darwin_amd64
 PKG_NAME=pkg/pipelines
-PKG_VERSION_PATH=github.com/davidschile-automox/terraform-provider-pipelines/${PKG_NAME}
+PKG_VERSION_PATH=github.com/jfrog/terraform-provider-pipelines/${PKG_NAME}
 VERSION := $(shell git tag --sort=-creatordate | head -1 | sed  -n 's/v\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1.\2.\3/p')
 NEXT_VERSION := $(shell echo ${VERSION}| awk -F '.' '{print $$1 "." $$2 "." $$3 +1 }' )
 BINARY_NAME=terraform-provider-pipelines
-#BUILD_PATH=terraform.d/plugins/registry.terraform.io/jfrog/pipelines/${NEXT_VERSION}/${TARGET_ARCH}
-BUILD_PATH=/Users/dschile/automox/terraform-sandbox/moxie-jfrog/.terraform/providers/registry.terraform.io/jfrog/pipelines/
+BUILD_PATH=terraform.d/plugins/registry.terraform.io/jfrog/pipelines/${NEXT_VERSION}/${TARGET_ARCH}
 
 install:
 	mkdir -p ${BUILD_PATH} && \

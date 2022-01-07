@@ -16,10 +16,9 @@ import (
 // ProjectIntegration GET {{ host }}/pipelines/api/v1/projectintegrations/{{projectIntegrationId}}
 
 type ProjectIntegration struct {
-	//Project                   string          `json:"project"`
 	Name                  string           `json:"name"`
 	ProjectId             int              `json:"projectId,omitempty"`
-	Project               Project          `json:"project,omitempty"`
+	Project               ProjectJSON      `json:"project,omitempty"`
 	MasterIntegrationId   int              `json:"masterIntegrationId"`
 	MasterIntegrationName string           `json:"masterIntegrationName"`
 	FormJSONValues        []FormJSONValues `json:"formJSONValues"`
@@ -33,7 +32,7 @@ type FormJSONValues struct {
 	Value string `json:"value"`
 }
 
-type Project struct {
+type ProjectJSON struct {
 	Key  string `json:"key,omitempty"`
 	Name string `json:"name,omitempty"`
 }
@@ -110,8 +109,8 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		},
 	}
 
-	var unpackProject = func(d *ResourceData, key string) Project {
-		var project Project
+	var unpackProject = func(d *ResourceData, key string) ProjectJSON {
+		var project ProjectJSON
 		input := d.Get(key).(map[string]interface{})
 		project.Key = input["key"].(string)
 		project.Name = input["name"].(string)
@@ -119,10 +118,10 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		return project
 	}
 
-	var packProject = func(d *schema.ResourceData, schemaKey string, project Project) []error {
+	var packProject = func(d *schema.ResourceData, schemaKey string, project ProjectJSON) []error {
 		var errors []error
 		log.Println("[DEBUG] packProject", project)
-		if (Project{}) == project {
+		if (ProjectJSON{}) == project {
 			return errors
 		}
 		setValue := mkLens(d)

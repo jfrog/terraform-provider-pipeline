@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 
-	"github.com/davidschile-automox/terraform-provider-pipelines/pkg/pipelines"
+	"github.com/jfrog/terraform-provider-pipelines/pkg/pipelines"
 )
 
 // Run the docs generation tool, check its repository for more information on how it works and how docs

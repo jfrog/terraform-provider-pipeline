@@ -49,6 +49,9 @@ func Provider() *schema.Provider {
 			"pipeline_node_pool":           pipelineNodePoolResource(),
 			"pipeline_node":                pipelineNodeResource(),
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"pipeline_project": projectDataSource(),
+		},
 	}
 
 	p.ConfigureContextFunc = func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
