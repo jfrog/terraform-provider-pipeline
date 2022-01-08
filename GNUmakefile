@@ -1,11 +1,11 @@
 TEST?=./...
 TARGET_ARCH?=darwin_amd64
-PKG_NAME=pkg/pipelines
-PKG_VERSION_PATH=github.com/jfrog/terraform-provider-pipelines/${PKG_NAME}
+PKG_NAME=pkg/pipeline
+PKG_VERSION_PATH=github.com/jfrog/terraform-provider-pipeline/${PKG_NAME}
 VERSION := $(shell git tag --sort=-creatordate | head -1 | sed  -n 's/v\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1.\2.\3/p')
 NEXT_VERSION := $(shell echo ${VERSION}| awk -F '.' '{print $$1 "." $$2 "." $$3 +1 }' )
-BINARY_NAME=terraform-provider-pipelines
-BUILD_PATH=terraform.d/plugins/registry.terraform.io/jfrog/pipelines/${NEXT_VERSION}/${TARGET_ARCH}
+BINARY_NAME=terraform-provider-pipeline
+BUILD_PATH=terraform.d/plugins/registry.terraform.io/jfrog/pipeline/${NEXT_VERSION}/${TARGET_ARCH}
 
 install:
 	mkdir -p ${BUILD_PATH} && \
@@ -36,7 +36,7 @@ test:
 	go test $(TEST) -timeout=30s -parallel=4
 
 attach:
-	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient attach $$(pgrep terraform-provider-pipelines)
+	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient attach $$(pgrep terraform-provider-pipeline)
 
 acceptance: fmtcheck
 	export TF_ACC=true && \

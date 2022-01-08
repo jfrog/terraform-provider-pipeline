@@ -1,4 +1,4 @@
-package pipelines
+package pipeline
 
 import (
 	"context"
@@ -15,8 +15,6 @@ import (
 
 var Version = "0.0.1"
 
-// Provider Pipelines provider that supports configuration via username+password or a token
-// Supported resources are repos, users, groups, replications, and permissions
 func Provider() *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
