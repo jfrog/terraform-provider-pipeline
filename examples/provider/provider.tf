@@ -1,4 +1,4 @@
 provider "pipeline" {
-  url = "${var.artifactory_url}"
-  access_token = "${var.artifactory_access_token}"
+  url = "${var.api_url}"
+  access_token = "${var.api_access_token}"
 }
