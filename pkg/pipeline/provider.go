@@ -85,7 +85,7 @@ func buildResty(URL string) (*resty.Client, error) {
 	}).
 		SetHeader("content-type", "application/json").
 		SetHeader("accept", "*/*").
-		SetHeader("user-agent", "jfrog/terraform-provider-pipelines:"+Version).
+		SetHeader("user-agent", "davidschile-automox/terraform-provider-pipelines:"+Version).
 		SetRetryCount(5)
 
 	restyBase.DisableWarn = true
