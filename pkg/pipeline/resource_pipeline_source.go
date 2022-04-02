@@ -94,7 +94,7 @@ func pipelineSourceResource() *schema.Resource {
 			Description:  "For multi-branch pipeline sources, a regular expression of the branches to include.",
 		},
 		"environments": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Optional: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,

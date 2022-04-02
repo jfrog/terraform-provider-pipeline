@@ -48,7 +48,8 @@ func Provider() *schema.Provider {
 			"pipeline_node":                pipelineNodeResource(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"pipeline_project": projectDataSource(),
+			"pipeline_project":   projectDataSource(),
+			"pipeline_templates": pipelineTemplatesDataSource(),
 		},
 	}
 
