@@ -122,7 +122,7 @@ func pipelineSourceResource() *schema.Resource {
 			IsMultiBranch:        d.getBool("is_multi_branch"),
 			BranchExcludePattern: d.getString("branch_exclude_pattern"),
 			BranchIncludePattern: d.getString("branch_include_pattern"),
-			Environments:         d.getList("environments"),
+			Environments:         d.getSet("environments"),
 			TemplateId:           d.getInt("template_id"),
 		}
 		return pipelineSource, nil
