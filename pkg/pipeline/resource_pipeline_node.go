@@ -3,14 +3,16 @@ package pipeline
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/jfrog/terraform-provider-shared/util"
 )
 
 type SystemPropertyBag struct {
@@ -82,24 +84,24 @@ func pipelineNodeResource() *schema.Resource {
 	}
 
 	var unpackNode = func(data *schema.ResourceData) (Node, error) {
-		d := &ResourceData{data}
+		d := &util.ResourceData{data}
 
 		node := Node{
-			FriendlyName:      d.getString("friendly_name"),
-			ProjectId:         d.getInt("project_id"),
-			NodePoolId:        d.getInt("node_pool_id"),
-			IsOnDemand:        d.getBool("is_on_demand"),
-			IsAutoInitialized: d.getBool("is_auto_initialized"),
-			IPAddress:         d.getString("ip_address"),
-			IsSwapEnabled:     d.getBool("is_swap_enabled"),
+			FriendlyName:      d.GetString("friendly_name", false),
+			ProjectId:         d.GetInt("project_id", false),
+			NodePoolId:        d.GetInt("node_pool_id", false),
+			IsOnDemand:        d.GetBool("is_on_demand", false),
+			IsAutoInitialized: d.GetBool("is_auto_initialized", false),
+			IPAddress:         d.GetString("ip_address", false),
+			IsSwapEnabled:     d.GetBool("is_swap_enabled", false),
 		}
-		node.SystemPropertyBag.Token = d.getString("token")
+		node.SystemPropertyBag.Token = d.GetString("token", false)
 		return node, nil
 	}
 
-	var packNode = func(d *schema.ResourceData, node Node) diag.Diagnostics {
+	var packNode = func(ctx context.Context, d *schema.ResourceData, node Node) diag.Diagnostics {
 		var errors []error
-		setValue := mkLens(d)
+		setValue := util.MkLens(d)
 
 		errors = setValue("project_id", node.ProjectId)
 		errors = append(errors, setValue("friendly_name", node.FriendlyName)...)
@@ -109,7 +111,7 @@ func pipelineNodeResource() *schema.Resource {
 		errors = append(errors, setValue("ip_address", node.IPAddress)...)
 		errors = append(errors, setValue("is_swap_enabled", node.IsSwapEnabled)...)
 		errors = append(errors, setValue("token", node.SystemPropertyBag.Token)...)
-		log.Println("[TRACE] token in object", node.SystemPropertyBag.Token)
+		tflog.Trace(ctx, fmt.Sprintf("token in object", node.SystemPropertyBag.Token))
 		if len(errors) > 0 {
 			return diag.Errorf("failed to pack node pool %q", errors)
 		}
@@ -118,7 +120,7 @@ func pipelineNodeResource() *schema.Resource {
 	}
 
 	var readNode = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] readNode")
+		tflog.Debug(ctx, "readNode")
 		node := Node{}
 		_, err := m.(*resty.Client).R().
 			SetResult(&node).
@@ -126,19 +128,19 @@ func pipelineNodeResource() *schema.Resource {
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		log.Println("[TRACE] from readNode; Node obj", node)
-		return packNode(data, node)
+		tflog.Trace(ctx, fmt.Sprintf("from readNode; Node obj %v", node))
+		return packNode(ctx, data, node)
 	}
 
 	var createNode = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] createNode")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "createNode")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		node, err := unpackNode(data)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		log.Printf("[TRACE] node; %+v\n", node)
+		tflog.Trace(ctx, fmt.Sprintf("node; %+v\n", node))
 		resp, err := m.(*resty.Client).R().SetBody(node).Post(nodesUrl)
 		if err != nil {
 			return diag.FromErr(err)
@@ -154,8 +156,8 @@ func pipelineNodeResource() *schema.Resource {
 	}
 
 	var updateNode = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] updateNode")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "updateNode")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		node, err := unpackNode(data)
 		if err != nil {
@@ -173,8 +175,8 @@ func pipelineNodeResource() *schema.Resource {
 	}
 
 	var deleteNode = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] deleteNode")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "deleteNode")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		resp, err := m.(*resty.Client).R().
 			Delete(nodesUrl + "/" + data.Id())

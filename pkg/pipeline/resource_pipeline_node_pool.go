@@ -3,14 +3,16 @@ package pipeline
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/jfrog/terraform-provider-shared/util"
 )
 
 // Project GET {{ host }}/access/api/v1/projects/{{prjKey}}/
@@ -85,24 +87,24 @@ func pipelineNodePoolResource() *schema.Resource {
 	}
 
 	var unpackNodePool = func(data *schema.ResourceData) (NodePool, error) {
-		d := &ResourceData{data}
+		d := &util.ResourceData{data}
 
 		nodePool := NodePool{
-			ProjectId:              d.getInt("project_id"),
-			Name:                   d.getString("name"),
-			NumberOfNodes:          d.getInt("number_of_nodes"),
-			IsOnDemand:             d.getBool("is_on_demand"),
-			Architecture:           d.getString("architecture"),
-			OperatingSystem:        d.getString("operating_system"),
-			NodeIdleIntervalInMins: d.getInt("node_idle_interval_in_mins"),
-			Environments:           d.getList("environments"),
+			ProjectId:              d.GetInt("project_id", false),
+			Name:                   d.GetString("name", false),
+			NumberOfNodes:          d.GetInt("number_of_nodes", false),
+			IsOnDemand:             d.GetBool("is_on_demand", false),
+			Architecture:           d.GetString("architecture", false),
+			OperatingSystem:        d.GetString("operating_system", false),
+			NodeIdleIntervalInMins: d.GetInt("node_idle_interval_in_mins", false),
+			Environments:           d.GetList("environments"),
 		}
 		return nodePool, nil
 	}
 
 	var packNodePool = func(d *schema.ResourceData, nodePool NodePool) diag.Diagnostics {
 		var errors []error
-		setValue := mkLens(d)
+		setValue := util.MkLens(d)
 
 		errors = setValue("project_id", nodePool.ProjectId)
 		errors = append(errors, setValue("name", nodePool.Name)...)
@@ -121,7 +123,7 @@ func pipelineNodePoolResource() *schema.Resource {
 	}
 
 	var readNodePool = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] readNodePool")
+		tflog.Debug(ctx, "readNodePool")
 
 		// This one returns an array of nodepools because the api doesn't seem to provide a GET
 		// for a single node pool id. instead it's a query value on id.
@@ -130,7 +132,7 @@ func pipelineNodePoolResource() *schema.Resource {
 		resp, err := m.(*resty.Client).R().
 			SetResult(&nodePools).
 			Get(nodePoolsUrl + "?nodePoolIds=" + data.Id())
-		log.Println("[TRACE] ", resp)
+		tflog.Trace(ctx, fmt.Sprintf("%v", resp))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -138,8 +140,8 @@ func pipelineNodePoolResource() *schema.Resource {
 	}
 
 	var createNodePool = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] createNodePool")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "createNodePool")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		nodePool, err := unpackNodePool(data)
 		if err != nil {
@@ -147,7 +149,7 @@ func pipelineNodePoolResource() *schema.Resource {
 		}
 
 		resp, err := m.(*resty.Client).R().SetBody(nodePool).Post(nodePoolsUrl)
-		log.Println("[DEBUG] ", resp)
+		tflog.Debug(ctx, fmt.Sprintf("%v", resp))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -162,8 +164,8 @@ func pipelineNodePoolResource() *schema.Resource {
 	}
 
 	var updateNodePool = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] updateNodePool")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "updateNodePool")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		nodePool, err := unpackNodePool(data)
 		if err != nil {
@@ -181,8 +183,8 @@ func pipelineNodePoolResource() *schema.Resource {
 	}
 
 	var deleteNodePool = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] deleteNodePool")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "deleteNodePool")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		resp, err := m.(*resty.Client).R().
 			Delete(nodePoolsUrl + "/" + data.Id())

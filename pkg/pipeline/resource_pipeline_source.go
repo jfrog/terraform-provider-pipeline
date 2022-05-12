@@ -3,14 +3,16 @@ package pipeline
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/jfrog/terraform-provider-shared/util"
 )
 
 // Project GET {{ host }}/access/api/v1/projects/{{prjKey}}/
@@ -110,27 +112,27 @@ func pipelineSourceResource() *schema.Resource {
 	}
 
 	var unpackPipelineSource = func(data *schema.ResourceData) (PipelineSource, error) {
-		d := &ResourceData{data}
+		d := &util.ResourceData{data}
 
 		pipelineSource := PipelineSource{
-			ProjectId:            d.getInt("project_id"),
-			Name:                 d.getString("name"),
-			ProjectIntegrationId: d.getInt("project_integration_id"),
-			RepositoryFullName:   d.getString("repository_full_name"),
-			Branch:               d.getString("branch"),
-			FileFilter:           d.getString("file_filter"),
-			IsMultiBranch:        d.getBool("is_multi_branch"),
-			BranchExcludePattern: d.getString("branch_exclude_pattern"),
-			BranchIncludePattern: d.getString("branch_include_pattern"),
-			Environments:         d.getList("environments"),
-			TemplateId:           d.getInt("template_id"),
+			ProjectId:            d.GetInt("project_id", false),
+			Name:                 d.GetString("name", false),
+			ProjectIntegrationId: d.GetInt("project_integration_id", false),
+			RepositoryFullName:   d.GetString("repository_full_name", false),
+			Branch:               d.GetString("branch", false),
+			FileFilter:           d.GetString("file_filter", false),
+			IsMultiBranch:        d.GetBool("is_multi_branch", false),
+			BranchExcludePattern: d.GetString("branch_exclude_pattern", false),
+			BranchIncludePattern: d.GetString("branch_include_pattern", false),
+			Environments:         d.GetList("environments"),
+			TemplateId:           d.GetInt("template_id", false),
 		}
 		return pipelineSource, nil
 	}
 
 	var packPipelineSource = func(d *schema.ResourceData, pipelineSource PipelineSource) diag.Diagnostics {
 		var errors []error
-		setValue := mkLens(d)
+		setValue := util.MkLens(d)
 
 		errors = setValue("project_id", pipelineSource.ProjectId)
 		errors = append(errors, setValue("name", pipelineSource.Name)...)
@@ -163,8 +165,8 @@ func pipelineSourceResource() *schema.Resource {
 	}
 
 	var createPipelineSource = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] createPipelineSource")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "createPipelineSource")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		pipelineSource, err := unpackPipelineSource(data)
 		if err != nil {
@@ -172,7 +174,7 @@ func pipelineSourceResource() *schema.Resource {
 		}
 
 		resp, err := m.(*resty.Client).R().SetBody(pipelineSource).Post(pipelineSourcesUrl)
-		log.Printf("[DEBUG] %+v\n", resp.Body())
+		tflog.Debug(ctx, fmt.Sprintf("%+v\n", resp.Body()))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -187,8 +189,8 @@ func pipelineSourceResource() *schema.Resource {
 	}
 
 	var updatePipelineSource = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] updatePipelineSource")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "updatePipelineSource")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		pipelineSource, err := unpackPipelineSource(data)
 		if err != nil {
@@ -206,8 +208,8 @@ func pipelineSourceResource() *schema.Resource {
 	}
 
 	var deletePipelineSource = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] deletePipelineSource")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "deletePipelineSource")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		resp, err := m.(*resty.Client).R().
 			Delete(pipelineSourcesUrl + "/" + data.Id())
