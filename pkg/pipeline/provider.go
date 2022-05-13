@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/jfrog/terraform-provider-shared/client"
 	"github.com/jfrog/terraform-provider-shared/util"
+	"github.com/jfrog/terraform-provider-shared/validator"
 )
 
 var Version = "0.0.1"
@@ -18,18 +19,18 @@ func Provider() *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"url": {
-				Type:         schema.TypeString,
-				Required:     true,
-				DefaultFunc:  schema.MultiEnvDefaultFunc([]string{"PIPELINES_URL", "JFROG_URL"}, "http://localhost:8082"),
-				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
-				Description:  "URL of Artifactory. This can also be sourced from the `PIPELINES_URL` or `JFROG_URL` environment variable. Default to 'http://localhost:8082' if not set.",
+				Type:             schema.TypeString,
+				Required:         true,
+				DefaultFunc:      schema.MultiEnvDefaultFunc([]string{"PIPELINES_URL", "JFROG_URL"}, "http://localhost:8082"),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
+				Description:      "URL of Artifactory. This can also be sourced from the `PIPELINES_URL` or `JFROG_URL` environment variable. Default to 'http://localhost:8082' if not set.",
 			},
 			"access_token": {
 				Type:             schema.TypeString,
 				Required:         true,
 				Sensitive:        true,
-				DefaultFunc:      schema.MultiEnvDefaultFunc([]string{"PIPELINES_ACCESS_TOKEN", "JFROG_ACCESS_TOKEN"}, ""),
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+				DefaultFunc:      schema.MultiEnvDefaultFunc([]string{"PIPELINES_ACCESS_TOKEN", "JFROG_ACCESS_TOKEN"}, nil),
+				ValidateDiagFunc: validator.StringIsNotEmpty,
 				Description:      "This is a Bearer token that can be given to you by your admin under `Identity and Access`. This can also be sourced from the `PIPELINES_ACCESS_TOKEN` or `JFROG_ACCESS_TOKEN` environment variable. Defauult to empty string if not set.",
 			},
 			"check_license": {
@@ -40,16 +41,22 @@ func Provider() *schema.Provider {
 			},
 		},
 
-		ResourcesMap: map[string]*schema.Resource{
-			"pipeline_source":              pipelineSourceResource(),
-			"pipeline_project_integration": pipelineProjectIntegrationResource(),
-			"pipeline_node_pool":           pipelineNodePoolResource(),
-			"pipeline_node":                pipelineNodeResource(),
-		},
+		ResourcesMap: util.AddTelemetry(
+			productId,
+			map[string]*schema.Resource{
+				"pipeline_source":              pipelineSourceResource(),
+				"pipeline_project_integration": pipelineProjectIntegrationResource(),
+				"pipeline_node_pool":           pipelineNodePoolResource(),
+				"pipeline_node":                pipelineNodeResource(),
+			},
+		),
 
-		DataSourcesMap: map[string]*schema.Resource{
-			"pipeline_project": projectDataSource(),
-		},
+		DataSourcesMap: util.AddTelemetry(
+			productId,
+			map[string]*schema.Resource{
+				"pipeline_project": projectDataSource(),
+			},
+		),
 	}
 
 	p.ConfigureContextFunc = func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
