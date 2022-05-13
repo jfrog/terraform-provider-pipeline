@@ -6,3 +6,5 @@ IMPROVEMENTS:
   * Use code from terraform-provider-shared module
   * Add documentation
   * Add telemetry
+
+PR [#3](https://github.com/jfrog/terraform-provider-pipeline/pull/3)
