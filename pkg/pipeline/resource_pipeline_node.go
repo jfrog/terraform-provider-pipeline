@@ -69,12 +69,12 @@ func pipelineNodeResource() *schema.Resource {
 			Type:         schema.TypeString,
 			Optional:     true,
 			ValidateFunc: validation.StringIsNotEmpty,
-			Description:  "TSet the architecture. This is currently limited to x86_64.",
+			Description:  "Node address for auto-initialization.",
 		},
 		"is_swap_enabled": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Description: "Enable/disable the use of swap space to increase the amount of virtual memory available to the node. ",
+			Description: "Enable/disable the use of swap space to increase the amount of virtual memory available to the node. Not available to Windows node pools.",
 		},
 		"token": {
 			Type:      schema.TypeString,

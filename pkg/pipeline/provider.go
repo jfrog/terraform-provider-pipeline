@@ -20,9 +20,9 @@ func Provider() *schema.Provider {
 			"url": {
 				Type:         schema.TypeString,
 				Required:     true,
-				DefaultFunc:  schema.MultiEnvDefaultFunc([]string{"PIPELINES_URL", "JFROG_URL"}, "http://localhost:8081"),
+				DefaultFunc:  schema.MultiEnvDefaultFunc([]string{"PIPELINES_URL", "JFROG_URL"}, "http://localhost:8082"),
 				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
-				Description:  "URL of Artifactory. This can also be sourced from the `PIPELINES_URL` or `JFROG_URL` environment variable. Default to 'http://localhost:8081' if not set.",
+				Description:  "URL of Artifactory. This can also be sourced from the `PIPELINES_URL` or `JFROG_URL` environment variable. Default to 'http://localhost:8082' if not set.",
 			},
 			"access_token": {
 				Type:             schema.TypeString,
@@ -83,7 +83,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 
 	checkLicense := d.Get("check_license").(bool)
 	if checkLicense {
-		licenseErr := util.CheckArtifactoryLicense(restyBase, "Enterprise")
+		licenseErr := util.CheckArtifactoryLicense(restyBase, "Enterprise Plus")
 		if licenseErr != nil {
 			return nil, licenseErr
 		}

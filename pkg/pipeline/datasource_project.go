@@ -27,6 +27,8 @@ func projectDataSource() *schema.Resource {
 				Description:  "The name of the project",
 			},
 		},
+
+		Description: "Gets the project that has an associated Pipelines object, such as an integration, pipeline source or node pool.",
 	}
 }
 
