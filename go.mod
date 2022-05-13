@@ -1,5 +1,7 @@
 module github.com/jfrog/terraform-provider-pipeline
 
+// replace github.com/jfrog/terraform-provider-shared => ../terraform-provider-shared
+
 require (
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/hashicorp/terraform-plugin-docs v0.8.1

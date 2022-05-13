@@ -111,7 +111,7 @@ func pipelineNodeResource() *schema.Resource {
 		errors = append(errors, setValue("ip_address", node.IPAddress)...)
 		errors = append(errors, setValue("is_swap_enabled", node.IsSwapEnabled)...)
 		errors = append(errors, setValue("token", node.SystemPropertyBag.Token)...)
-		tflog.Trace(ctx, fmt.Sprintf("token in object", node.SystemPropertyBag.Token))
+		tflog.Trace(ctx, fmt.Sprintf("token in object: %s", node.SystemPropertyBag.Token))
 		if len(errors) > 0 {
 			return diag.Errorf("failed to pack node pool %q", errors)
 		}
