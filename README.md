@@ -1,14 +1,35 @@
 # Terraform Provider for Artifactory Pipelines
 
-TBD
+## Documentation
+
+To use this provider in your Terraform module, follow the documentation on [Terraform Registry](https://registry.terraform.io/providers/jfrog/pipeline/latest/docs).
+
+## License requirements
+
+This provider requires access to Artifactory APIs, which are only available in the _licensed_ enterprise plus editions. You can determine which license you have by accessing the following URL `${host}/artifactory/api/system/licenses/`
+
+You can either access it via API, or web browser - it requires admin level credentials, but it's one of the few APIs that will work without a license (side node: you can also install your license here with a `POST`)
+
+```sh
+$ curl -sL ${host}/artifactory/api/system/licenses/ | jq .
+```
+
+```js
+{
+  "type" : "Enterprise Plus Trial",
+  "validThrough" : "Jan 29, 2022",
+  "licensedTo" : "JFrog Ltd"
+}
+```
+
+The following 3 license types (`jq .type`) do **NOT** support APIs:
+- Community Edition for C/C++
+- JCR Edition
+- OSS
 
 ## Versioning
 
-In general, this project follows [semver](https://semver.org/) as closely as we can for tagging releases of the package. We've adopted the following versioning policy:
-
-* We increment the **major version** with any incompatible change to functionality, including changes to the exported Go API surface or behavior of the API.
-* We increment the **minor version** with any backwards-compatible changes to functionality.
-* We increment the **patch version** with any backwards-compatible bug fixes.
+In general, this project follows [Terraform Versioning Specification](https://www.terraform.io/plugin/sdkv2/best-practices/versioning#versioning-specification) as closely as we can for tagging releases of the package.
 
 ## Contributors
 
