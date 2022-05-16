@@ -63,7 +63,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			Description: "An object containing a project name as an alternative to projectId.",
+			Description: "An object containing a project name as an alternative to projectId. The following properties can be set: name, key",
 		},
 		"master_integration_id": {
 			Type:         schema.TypeInt,
