@@ -11,7 +11,7 @@ install:
 		(test -f terraform-provider-pipeline || go build -ldflags="-X '${PKG_VERSION_PATH}.Version=${NEXT_VERSION}'") && \
 		mv terraform-provider-pipeline ${BUILD_PATH} && \
 		rm -f .terraform.lock.hcl && \
-		sed -i 's/version = ".*"/version = "${NEXT_VERSION}"/' sample.tf && \
+		sed -i.bak -E '0,/version = ".*"/ s/version = ".*"/version = "${NEXT_VERSION}"/' sample.tf && rm sample.tf.bak && \
 		terraform init
 
 clean:
