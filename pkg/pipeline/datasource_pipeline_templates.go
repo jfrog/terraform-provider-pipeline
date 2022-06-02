@@ -25,7 +25,7 @@ func pipelineTemplatesDataSource() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"templates": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
