@@ -75,7 +75,7 @@ func pipelineNodePoolResource() *schema.Resource {
 			Description:  "Number of minutes a node can be idle before it is destroyed.",
 		},
 		"environments": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Optional: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
@@ -95,7 +95,7 @@ func pipelineNodePoolResource() *schema.Resource {
 			Architecture:           d.getString("architecture"),
 			OperatingSystem:        d.getString("operating_system"),
 			NodeIdleIntervalInMins: d.getInt("node_idle_interval_in_mins"),
-			Environments:           d.getList("environments"),
+			Environments:           d.getSet("environments"),
 		}
 		return nodePool, nil
 	}

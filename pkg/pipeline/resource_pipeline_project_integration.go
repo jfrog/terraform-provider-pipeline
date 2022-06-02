@@ -76,7 +76,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			Description:  "The name of the master integration.",
 		},
 		"form_json_values": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Required: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
@@ -95,7 +95,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			Description: "Multiple objects with the values for the integration.",
 		},
 		"environments": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Optional: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
@@ -131,7 +131,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 
 	var unpackFormJSONValues = func(d *ResourceData, key string) []FormJSONValues {
 		var formJSONValues []FormJSONValues
-		keyValues := d.Get(key).([]interface{})
+		keyValues := d.Get(key).(*schema.Set).List()
 		for _, keyValue := range keyValues {
 			idx := keyValue.(map[string]interface{})
 			formJSONValue := FormJSONValues{
@@ -165,7 +165,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			ProjectId:             d.getInt("project_id"),
 			MasterIntegrationId:   d.getInt("master_integration_id"),
 			MasterIntegrationName: d.getString("master_integration_name"),
-			Environments:          d.getList("environments"),
+			Environments:          d.getSet("environments"),
 			IsInternal:            d.getBool("is_internal"),
 			Project:               unpackProject(d, "project"),
 			FormJSONValues:        unpackFormJSONValues(d, "form_json_values"),
