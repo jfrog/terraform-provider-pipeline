@@ -177,9 +177,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		var errors []error
 		setValue := mkLens(d)
 
-		errors = setValue("project_id", projectIntegration.ProjectId)
-		errors = append(errors, setValue("name", projectIntegration.Name)...)
-		errors = append(errors, setValue("project_id", projectIntegration.ProjectId)...)
+		errors = setValue("name", projectIntegration.Name)
 		errors = append(errors, setValue("master_integration_id", projectIntegration.MasterIntegrationId)...)
 		errors = append(errors, setValue("master_integration_name", projectIntegration.MasterIntegrationName)...)
 		errors = append(errors, setValue("environments", projectIntegration.Environments)...)
