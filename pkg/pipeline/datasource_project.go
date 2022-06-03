@@ -39,10 +39,10 @@ func dataSourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	return packProject(projects[0], d)
+	return packProjectData(projects[0], d)
 }
 
-func packProject(project Project, d *schema.ResourceData) error {
+func packProjectData(project Project, d *schema.ResourceData) error {
 	d.SetId(strconv.Itoa(project.Id))
 	return nil
 }
