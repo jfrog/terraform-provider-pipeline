@@ -4,16 +4,14 @@ PKG_NAME=pkg/pipeline
 PKG_VERSION_PATH=github.com/davidschile-automox/terraform-provider-pipeline/${PKG_NAME}
 VERSION := $(shell git tag --sort=-creatordate | head -1 | sed  -n 's/v\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1.\2.\3/p')
 NEXT_VERSION := $(shell echo ${VERSION}| awk -F '.' '{print $$1 "." $$2 "." $$3 +1 }' )
-BINARY_NAME=terraform-provider-pipeline
-BUILD_PATH=terraform.d/plugins/registry.terraform.io/davidschile-automox/pipeline/${NEXT_VERSION}/${TARGET_ARCH}
-
+BUILD_PATH=terraform.d/plugins/registry.terraform.io/jfrog/pipeline/${NEXT_VERSION}/${TARGET_ARCH}
 
 install:
 	mkdir -p ${BUILD_PATH} && \
-		(test -f ${BINARY_NAME} || go build -o ./${BINARY_NAME} -ldflags="-X '${PKG_VERSION_PATH}.Version=${NEXT_VERSION}'") && \
-		mv ${BINARY_NAME} ${BUILD_PATH} && \
+		(test -f terraform-provider-pipeline || go build -ldflags="-X '${PKG_VERSION_PATH}.Version=${NEXT_VERSION}'") && \
+		mv terraform-provider-pipeline ${BUILD_PATH} && \
 		rm -f .terraform.lock.hcl && \
-		sed -i 's/version = ".*"/version = "${NEXT_VERSION}"/' sample.tf && \
+		sed -i.bak -E '0,/version = ".*"/ s/version = ".*"/version = "${NEXT_VERSION}"/' sample.tf && rm sample.tf.bak && \
 		terraform init
 
 clean:
@@ -28,8 +26,8 @@ build: fmtcheck
 
 debug_install:
 	mkdir -p ${BUILD_PATH} && \
-		(test -f ${BINARY_NAME} || go build ./${BINARY_NAME} -gcflags "all=-N -l" -ldflags="-X '${PKG_VERSION_PATH}.Version=${NEXT_VERSION}-develop'") && \
-		mv ${BINARY_NAME} ${BUILD_PATH} && \
+		(test -f terraform-provider-pipeline || go build -gcflags "all=-N -l" -ldflags="-X '${PKG_VERSION_PATH}.Version=${NEXT_VERSION}-develop'") && \
+		mv terraform-provider-pipeline ${BUILD_PATH} && \
 		terraform init
 
 test:
@@ -46,7 +44,7 @@ acceptance: fmtcheck
 fmt:
 	@echo "==> Fixing source code with gofmt..."
 	@gofmt -s -w ./$(PKG_NAME)
-	(command -v goimports &> /dev/null || go get golang.org/x/tools/cmd/goimports) && goimports -w ${PKG_NAME}
+	(command -v ${GOBIN}/goimports &> /dev/null || go get golang.org/x/tools/cmd/goimports) && ${GOBIN}/goimports -w pkg/pipeline
 
 fmtcheck:
 	@echo "==> Checking that code complies with gofmt requirements..."

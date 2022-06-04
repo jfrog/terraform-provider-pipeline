@@ -3,14 +3,16 @@ package pipeline
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/jfrog/terraform-provider-shared/util"
 )
 
 // ProjectIntegration GET {{ host }}/pipelines/api/v1/projectintegrations/{{projectIntegrationId}}
@@ -61,7 +63,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			Description: "An object containing a project name as an alternative to projectId.",
+			Description: "An object containing a project name as an alternative to projectId. The following properties can be set: name, key",
 		},
 		"master_integration_id": {
 			Type:         schema.TypeInt,
@@ -109,7 +111,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		},
 	}
 
-	var unpackProject = func(d *ResourceData, key string) ProjectJSON {
+	var unpackProject = func(d *util.ResourceData, key string) ProjectJSON {
 		var project ProjectJSON
 		input := d.Get(key).(map[string]interface{})
 		project.Key = input["key"].(string)
@@ -118,18 +120,18 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		return project
 	}
 
-	var packProject = func(d *schema.ResourceData, schemaKey string, project ProjectJSON) []error {
+	var packProject = func(ctx context.Context, d *schema.ResourceData, schemaKey string, project ProjectJSON) []error {
 		var errors []error
-		log.Println("[DEBUG] packProject", project)
+		tflog.Debug(ctx, fmt.Sprintf("packProject %v", project))
 		if (ProjectJSON{}) == project {
 			return errors
 		}
-		setValue := mkLens(d)
+		setValue := util.MkLens(d)
 		errors = append(errors, setValue(schemaKey, project)...)
 		return errors
 	}
 
-	var unpackFormJSONValues = func(d *ResourceData, key string) []FormJSONValues {
+	var unpackFormJSONValues = func(d *util.ResourceData, key string) []FormJSONValues {
 		var formJSONValues []FormJSONValues
 		keyValues := d.Get(key).([]interface{})
 		for _, keyValue := range keyValues {
@@ -144,7 +146,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 	}
 
 	var packFormJSONValues = func(d *schema.ResourceData, schemaKey string, formJSONValues []FormJSONValues) []error {
-		setValue := mkLens(d)
+		setValue := util.MkLens(d)
 		var keyValues []interface{}
 		for _, idx := range formJSONValues {
 			keyValue := map[string]interface{}{
@@ -158,24 +160,24 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 	}
 
 	var unpackProjectIntegration = func(data *schema.ResourceData) (ProjectIntegration, error) {
-		d := &ResourceData{data}
+		d := &util.ResourceData{data}
 
 		projectIntegration := ProjectIntegration{
-			Name:                  d.getString("name"),
-			ProjectId:             d.getInt("project_id"),
-			MasterIntegrationId:   d.getInt("master_integration_id"),
-			MasterIntegrationName: d.getString("master_integration_name"),
-			Environments:          d.getList("environments"),
-			IsInternal:            d.getBool("is_internal"),
+			Name:                  d.GetString("name", false),
+			ProjectId:             d.GetInt("project_id", false),
+			MasterIntegrationId:   d.GetInt("master_integration_id", false),
+			MasterIntegrationName: d.GetString("master_integration_name", false),
+			Environments:          d.GetList("environments"),
+			IsInternal:            d.GetBool("is_internal", false),
 			Project:               unpackProject(d, "project"),
 			FormJSONValues:        unpackFormJSONValues(d, "form_json_values"),
 		}
 		return projectIntegration, nil
 	}
 
-	var packProjectIntegration = func(d *schema.ResourceData, projectIntegration ProjectIntegration) diag.Diagnostics {
+	var packProjectIntegration = func(ctx context.Context, d *schema.ResourceData, projectIntegration ProjectIntegration) diag.Diagnostics {
 		var errors []error
-		setValue := mkLens(d)
+		setValue := util.MkLens(d)
 
 		errors = setValue("project_id", projectIntegration.ProjectId)
 		errors = append(errors, setValue("name", projectIntegration.Name)...)
@@ -184,7 +186,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		errors = append(errors, setValue("master_integration_name", projectIntegration.MasterIntegrationName)...)
 		errors = append(errors, setValue("environments", projectIntegration.Environments)...)
 		errors = append(errors, setValue("is_internal", projectIntegration.IsInternal)...)
-		errors = append(errors, packProject(d, "project", projectIntegration.Project)...)
+		errors = append(errors, packProject(ctx, d, "project", projectIntegration.Project)...)
 		errors = append(errors, packFormJSONValues(d, "form_json_values", projectIntegration.FormJSONValues)...)
 
 		if len(errors) > 0 {
@@ -195,22 +197,22 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 	}
 
 	var readProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] readProjectIntegration")
+		tflog.Debug(ctx, "readProjectIntegration")
 		projectIntegration := ProjectIntegration{}
 		resp, err := m.(*resty.Client).R().
 			SetResult(&projectIntegration).
 			Get(projectIntegrationsUrl + "/" + data.Id())
-		log.Println("[DEBUG] projectIntegration body: ", string(json.RawMessage(resp.Body())))
+		tflog.Debug(ctx, fmt.Sprintf("projectIntegration body: %s", string(json.RawMessage(resp.Body()))))
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		log.Println("[DEBUG] projectIntegration Obj: ", projectIntegration)
-		return packProjectIntegration(data, projectIntegration)
+		tflog.Debug(ctx, fmt.Sprintf("projectIntegration Obj: %v", projectIntegration))
+		return packProjectIntegration(ctx, data, projectIntegration)
 	}
 
 	var createProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] createProjectIntegration")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "createProjectIntegration")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		projectIntegration, err := unpackProjectIntegration(data)
 		if err != nil {
@@ -232,8 +234,8 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 	}
 
 	var updateProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] updateProjectIntegration")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "updateProjectIntegration")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		projectIntegration, err := unpackProjectIntegration(data)
 		if err != nil {
@@ -251,8 +253,8 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 	}
 
 	var deleteProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] deleteProjectIntegration")
-		log.Printf("[TRACE] %+v\n", data)
+		tflog.Debug(ctx, "deleteProjectIntegration")
+		tflog.Trace(ctx, fmt.Sprintf("%+v\n", data))
 
 		resp, err := m.(*resty.Client).R().
 			Delete(projectIntegrationsUrl + "/" + data.Id())
