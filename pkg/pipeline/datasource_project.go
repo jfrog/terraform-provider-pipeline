@@ -43,10 +43,10 @@ func dataSourceProjectRead(ctx context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	return packProject(projects[0], d)
+	return packProjectData(projects[0], d)
 }
 
-func packProject(project Project, d *schema.ResourceData) diag.Diagnostics {
+func packProjectData(project Project, d *schema.ResourceData) diag.Diagnostics {
 	d.SetId(strconv.Itoa(project.Id))
 	return nil
 }

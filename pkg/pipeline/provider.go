@@ -41,22 +41,19 @@ func Provider() *schema.Provider {
 			},
 		},
 
-		ResourcesMap: util.AddTelemetry(
-			productId,
-			map[string]*schema.Resource{
-				"pipeline_source":              pipelineSourceResource(),
-				"pipeline_project_integration": pipelineProjectIntegrationResource(),
-				"pipeline_node_pool":           pipelineNodePoolResource(),
-				"pipeline_node":                pipelineNodeResource(),
-			},
-		),
-
-		DataSourcesMap: util.AddTelemetry(
-			productId,
-			map[string]*schema.Resource{
-				"pipeline_project": projectDataSource(),
-			},
-		),
+		ResourcesMap: map[string]*schema.Resource{
+			"pipeline_source":                          pipelineSourceResource(),
+			"pipeline_artifactory_project_integration": pipelineArtifactoryProjectIntegrationResource(),
+			"pipeline_github_project_integration":      pipelineGithubProjectIntegrationResource(),
+			"pipeline_kubernetes_project_integration":  pipelineKubernetesProjectIntegrationResource(),
+			"pipeline_slack_project_integration":       pipelineSlackProjectIntegrationResource(),
+			"pipeline_node_pool":                       pipelineNodePoolResource(),
+			"pipeline_node":                            pipelineNodeResource(),
+		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"pipeline_project":   projectDataSource(),
+			"pipeline_templates": pipelineTemplatesDataSource(),
+		},
 	}
 
 	p.ConfigureContextFunc = func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {

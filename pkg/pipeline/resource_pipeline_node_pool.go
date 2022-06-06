@@ -77,7 +77,7 @@ func pipelineNodePoolResource() *schema.Resource {
 			Description:  "Number of minutes a node can be idle before it is destroyed.",
 		},
 		"environments": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Optional: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
