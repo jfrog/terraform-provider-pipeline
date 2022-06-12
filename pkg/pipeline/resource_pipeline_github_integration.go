@@ -29,18 +29,6 @@ func pipelineGithubProjectIntegrationResource() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 				Description:  "URL to Github instance",
 			},
-			"master_integration_id": {
-				Type:        schema.TypeInt,
-				Default:     20,
-				Optional:    true,
-				Description: "The Id of the master integration.",
-			},
-			"master_integration_name": {
-				Type:        schema.TypeString,
-				Default:     "github",
-				Optional:    true,
-				Description: "The name of the master integration.",
-			},
 		},
 	)
 
@@ -62,9 +50,9 @@ func pipelineGithubProjectIntegrationResource() *schema.Resource {
 	var packGithubFormValues = func(d *schema.ResourceData, formJSONValues []FormJSONValues) []error {
 		setValue := util.MkLens(d)
 		var errors []error
-		for _, idx := range formJSONValues {
-			if idx.Label == "url" {
-				errors = append(errors, setValue("url", idx.Value)...)
+		for _, jsonValue := range formJSONValues {
+			if jsonValue.Label == "url" {
+				errors = setValue("url", jsonValue.Value)
 			}
 		}
 		return errors
@@ -88,6 +76,7 @@ func pipelineGithubProjectIntegrationResource() *schema.Resource {
 		log.Printf("[DEBUG] createGithubProjectIntegration")
 
 		githubFormValues := unpackGithubFormValues(data)
+		setUniqueIntegrationNameAndId(data, "github", 20)
 		err := createProjectIntegration(data, m, githubFormValues)
 		if err != nil {
 			return diag.FromErr(err)

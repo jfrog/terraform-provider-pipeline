@@ -22,18 +22,6 @@ func pipelineSlackProjectIntegrationResource() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithScheme([]string{"slack"})),
 				Description:  "url for Slack access",
 			},
-			"master_integration_id": {
-				Type:        schema.TypeInt,
-				Default:     78,
-				Optional:    true,
-				Description: "The Id of the master integration.",
-			},
-			"master_integration_name": {
-				Type:        schema.TypeString,
-				Default:     "slackKey",
-				Optional:    true,
-				Description: "The name of the master integration.",
-			},
 		},
 	)
 
@@ -62,6 +50,7 @@ func pipelineSlackProjectIntegrationResource() *schema.Resource {
 		log.Printf("[DEBUG] createSlackProjectIntegration")
 
 		slackFormValues := unpackSlackFormValues(data)
+		setUniqueIntegrationNameAndId(data, "slackKey", 78)
 		err := createProjectIntegration(data, m, slackFormValues)
 		if err != nil {
 			return diag.FromErr(err)

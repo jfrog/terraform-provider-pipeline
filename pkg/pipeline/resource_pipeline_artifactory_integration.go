@@ -34,18 +34,6 @@ func pipelineArtifactoryProjectIntegrationResource() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithScheme([]string{"github"})),
 				Description:  "URL to Artifactory instance",
 			},
-			"master_integration_id": {
-				Type:        schema.TypeInt,
-				Default:     98,
-				Optional:    true,
-				Description: "The Id of the master integration.",
-			},
-			"master_integration_name": {
-				Type:        schema.TypeString,
-				Default:     "artifactory",
-				Optional:    true,
-				Description: "The name of the master integration.",
-			},
 		},
 	)
 
@@ -71,12 +59,12 @@ func pipelineArtifactoryProjectIntegrationResource() *schema.Resource {
 	var packArtifactoryFormValues = func(d *schema.ResourceData, formJSONValues []FormJSONValues) []error {
 		setValue := util.MkLens(d)
 		var errors []error
-		for _, idx := range formJSONValues {
-			if idx.Label == "url" {
-				errors = append(errors, setValue("url", idx.Value)...)
+		for _, jsonValue := range formJSONValues {
+			if jsonValue.Label == "url" {
+				errors = setValue("url", jsonValue.Value)
 			}
-			if idx.Label == "user" {
-				errors = append(errors, setValue("user", idx.Value)...)
+			if jsonValue.Label == "user" {
+				errors = setValue("user", jsonValue.Value)
 			}
 
 		}
@@ -101,6 +89,7 @@ func pipelineArtifactoryProjectIntegrationResource() *schema.Resource {
 		log.Printf("[DEBUG] createArtifactoryProjectIntegration")
 
 		artifactoryFormValues := unpackArtifactoryFormValues(data)
+		setUniqueIntegrationNameAndId(data, "artifactory", 98)
 		err := createProjectIntegration(data, m, artifactoryFormValues)
 		if err != nil {
 			return diag.FromErr(err)

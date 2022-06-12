@@ -138,6 +138,13 @@ func packProjectIntegration(d *schema.ResourceData, projectIntegration ProjectIn
 	return errors
 }
 
+func setUniqueIntegrationNameAndId(d *schema.ResourceData, name string, id int) []error {
+	setValue := util.MkLens(d)
+	setValue("master_integration_name", name)
+	errors := setValue("master_integration_id", id)
+	return errors
+}
+
 func readProjectIntegration(data *schema.ResourceData, m interface{}) ([]FormJSONValues, error) {
 	log.Printf("[DEBUG] readProjectIntegration")
 	projectIntegration := ProjectIntegration{}

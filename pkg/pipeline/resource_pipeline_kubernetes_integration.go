@@ -22,18 +22,6 @@ func pipelineKubernetesProjectIntegrationResource() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 				Description:  "Token for Kubernetes access",
 			},
-			"master_integration_id": {
-				Type:        schema.TypeInt,
-				Default:     86,
-				Optional:    true,
-				Description: "The Id of the master integration.",
-			},
-			"master_integration_name": {
-				Type:        schema.TypeString,
-				Default:     "kubernetesConfig",
-				Optional:    true,
-				Description: "The name of the master integration.",
-			},
 		},
 	)
 
@@ -62,6 +50,7 @@ func pipelineKubernetesProjectIntegrationResource() *schema.Resource {
 		log.Printf("[DEBUG] createKubernetesProjectIntegration")
 
 		kubernetesFormValues := unpackKubernetesFormValues(data)
+		setUniqueIntegrationNameAndId(data, "kubernetesConfig", 86)
 		err := createProjectIntegration(data, m, kubernetesFormValues)
 		if err != nil {
 			return diag.FromErr(err)

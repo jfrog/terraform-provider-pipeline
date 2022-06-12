@@ -40,10 +40,10 @@ func pipelineGenericIntegrationResource() *schema.Resource {
 		var formJSONValues []FormJSONValues
 		keyValues := d.Get("form_json_values").([]interface{})
 		for _, keyValue := range keyValues {
-			idx := keyValue.(map[string]interface{})
+			jsonValue := keyValue.(map[string]interface{})
 			formJSONValue := FormJSONValues{
-				Label: idx["label"].(string),
-				Value: idx["value"].(string),
+				Label: jsonValue["label"].(string),
+				Value: jsonValue["value"].(string),
 			}
 			formJSONValues = append(formJSONValues, formJSONValue)
 		}
@@ -53,10 +53,10 @@ func pipelineGenericIntegrationResource() *schema.Resource {
 	var packFormValues = func(d *schema.ResourceData, formJSONValues []FormJSONValues) []error {
 		setValue := util.MkLens(d)
 		var keyValues []interface{}
-		for _, idx := range formJSONValues {
+		for _, jsonValue := range formJSONValues {
 			keyValue := map[string]interface{}{
-				"label": idx.Label,
-				"value": idx.Value,
+				"label": jsonValue.Label,
+				"value": jsonValue.Value,
 			}
 			keyValues = append(keyValues, keyValue)
 		}

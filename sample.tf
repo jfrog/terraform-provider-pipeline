@@ -2,7 +2,7 @@ terraform {
   required_providers {
     pipeline = {
       source  = "registry.terraform.io/jfrog/pipeline"
-      version = "0.0.17"
+      version = "0.1.1"
     }
     project = {
       source  = "registry.terraform.io/jfrog/project"
