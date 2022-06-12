@@ -43,6 +43,7 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"pipeline_source":                          pipelineSourceResource(),
+			"pipeline_project_integration":	            pipelineGenericIntegrationResource(),
 			"pipeline_artifactory_project_integration": pipelineArtifactoryProjectIntegrationResource(),
 			"pipeline_github_project_integration":      pipelineGithubProjectIntegrationResource(),
 			"pipeline_kubernetes_project_integration":  pipelineKubernetesProjectIntegrationResource(),

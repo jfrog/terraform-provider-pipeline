@@ -75,6 +75,18 @@ var projectIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "Set this as false to create a Pipelines integration.",
 	},
+	"master_integration_id": {
+		Type:         schema.TypeInt,
+		Required:     true,
+		ValidateFunc: validation.IntAtLeast(0),
+		Description:  "The Id of the master integration.",
+	},
+	"master_integration_name": {
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringIsNotEmpty,
+		Description:  "The name of the master integration.",
+	},
 }
 
 func unpackProject(data *util.ResourceData, key string) ProjectJSON {
@@ -114,14 +126,13 @@ func unpackProjectIntegration(data *schema.ResourceData, formJsonValues []FormJS
 }
 
 func packProjectIntegration(d *schema.ResourceData, projectIntegration ProjectIntegration) []error {
-	var errors []error
 	setValue := util.MkLens(d)
 
-	errors = setValue("name", projectIntegration.Name)
-	errors = append(errors, setValue("master_integration_id", projectIntegration.MasterIntegrationId)...)
-	errors = append(errors, setValue("master_integration_name", projectIntegration.MasterIntegrationName)...)
-	errors = append(errors, setValue("environments", projectIntegration.Environments)...)
-	errors = append(errors, setValue("is_internal", projectIntegration.IsInternal)...)
+	setValue("name", projectIntegration.Name)
+	setValue("master_integration_id", projectIntegration.MasterIntegrationId)
+	setValue("master_integration_name", projectIntegration.MasterIntegrationName)
+	setValue("environments", projectIntegration.Environments)
+	errors := setValue("is_internal", projectIntegration.IsInternal)
 	errors = append(errors, packProject(d, "project", projectIntegration.Project)...)
 
 	return errors
