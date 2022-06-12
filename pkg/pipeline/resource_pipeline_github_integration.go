@@ -19,14 +19,14 @@ func pipelineGithubProjectIntegrationResource() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Sensitive:    true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 				Description:  "Token for Github access",
 			},
 
 			"url": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 				Description:  "URL to Github instance",
 			},
 			"master_integration_id": {

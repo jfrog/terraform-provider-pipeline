@@ -25,7 +25,7 @@ func projectDataSource() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 				Description:  "The name of the project",
 			},
 		},

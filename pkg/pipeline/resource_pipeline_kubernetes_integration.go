@@ -19,7 +19,7 @@ func pipelineKubernetesProjectIntegrationResource() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Sensitive:    true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 				Description:  "Token for Kubernetes access",
 			},
 			"master_integration_id": {

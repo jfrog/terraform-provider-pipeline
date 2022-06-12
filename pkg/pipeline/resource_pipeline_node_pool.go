@@ -38,7 +38,7 @@ func pipelineNodePoolResource() *schema.Resource {
 		"name": {
 			Type:         schema.TypeString,
 			Required:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "The name of the node pool. Should be prefixed with the project key",
 		},
 		"project_id": {
@@ -61,13 +61,13 @@ func pipelineNodePoolResource() *schema.Resource {
 		"architecture": {
 			Type:         schema.TypeString,
 			Required:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "Set the architecture. This is currently limited to x86_64.",
 		},
 		"operating_system": {
 			Type:         schema.TypeString,
 			Required:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "Operating systems supported for the selected architecture.",
 		},
 		"node_idle_interval_in_mins": {

@@ -44,7 +44,7 @@ var projectIntegrationSchema = map[string]*schema.Schema{
 	"name": {
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringIsNotEmpty,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		Description:  "The name of the project integration. Should be prefixed with the project key",
 	},
 
@@ -84,7 +84,7 @@ var projectIntegrationSchema = map[string]*schema.Schema{
 	"master_integration_name": {
 		Type:         schema.TypeString,
 		Optional:     true,
-		ValidateFunc: validation.StringIsNotEmpty,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		Description:  "The name of the master integration.",
 	},
 }

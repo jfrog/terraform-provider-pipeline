@@ -19,7 +19,7 @@ func pipelineSlackProjectIntegrationResource() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Sensitive:    true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithScheme([]string{"slack"})),
 				Description:  "url for Slack access",
 			},
 			"master_integration_id": {

@@ -19,19 +19,19 @@ func pipelineArtifactoryProjectIntegrationResource() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Sensitive:    true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 				Description:  "ApiKey for Artifactory access",
 			},
 			"user": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 				Description:  "User for Artifactory access",
 			},
 			"url": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithScheme([]string{"github"})),
 				Description:  "URL to Artifactory instance",
 			},
 			"master_integration_id": {

@@ -45,7 +45,7 @@ func pipelineSourceResource() *schema.Resource {
 		"name": {
 			Type:         schema.TypeString,
 			Required:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "The name of the pipeline source. Should be prefixed with the project key",
 		},
 		"project_id": {
@@ -63,13 +63,13 @@ func pipelineSourceResource() *schema.Resource {
 		"repository_full_name": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "The full name of the Git repository including the user/organization as it appears in a Git clone command. For example, myOrg/myProject.",
 		},
 		"file_filter": {
 			Type:         schema.TypeString,
 			Required:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "A regular expression to determine which files to include in pipeline sync (the YML files), with default pipelines.yml. If a templateId was provided, it must be values.yml.",
 		},
 		"is_multi_branch": {
@@ -80,19 +80,19 @@ func pipelineSourceResource() *schema.Resource {
 		"branch": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "For single branch pipeline sources. Name of branch that has the pipeline definition.",
 		},
 		"branch_exclude_pattern": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "For multi-branch pipeline sources, a regular expression of the branches to exclude.",
 		},
 		"branch_include_pattern": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "For multi-branch pipeline sources, a regular expression of the branches to include.",
 		},
 		"environments": {
