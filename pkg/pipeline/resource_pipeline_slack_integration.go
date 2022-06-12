@@ -2,8 +2,8 @@ package pipeline
 
 import (
 	"context"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -37,7 +37,7 @@ func pipelineSlackProjectIntegrationResource() *schema.Resource {
 	}
 
 	var readSlackProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] readSlackProjectIntegration")
+		tflog.Debug(ctx, "readSlackProjectIntegration")
 		_, err := readProjectIntegration(data, m)
 		if err != nil {
 			return diag.FromErr(err)
@@ -47,7 +47,7 @@ func pipelineSlackProjectIntegrationResource() *schema.Resource {
 	}
 
 	var createSlackProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] createSlackProjectIntegration")
+		tflog.Debug(ctx, "createSlackProjectIntegration")
 
 		slackFormValues := unpackSlackFormValues(data)
 		setUniqueIntegrationNameAndId(data, "slackKey", 78)
@@ -60,7 +60,7 @@ func pipelineSlackProjectIntegrationResource() *schema.Resource {
 	}
 
 	var updateSlackProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] updateSlackProjectIntegration")
+		tflog.Debug(ctx, "updateSlackProjectIntegration")
 
 		slackFormValues := unpackSlackFormValues(data)
 		err := updateProjectIntegration(data, m, slackFormValues)

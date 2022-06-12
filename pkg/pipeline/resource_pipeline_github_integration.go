@@ -2,8 +2,8 @@ package pipeline
 
 import (
 	"context"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -59,7 +59,7 @@ func pipelineGithubProjectIntegrationResource() *schema.Resource {
 	}
 
 	var readGithubProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] readGithubProjectIntegration")
+		tflog.Debug(ctx, "readGithubProjectIntegration")
 		formJsonValues, err := readProjectIntegration(data, m)
 		if err != nil {
 			return diag.FromErr(err)
@@ -73,7 +73,7 @@ func pipelineGithubProjectIntegrationResource() *schema.Resource {
 	}
 
 	var createGithubProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] createGithubProjectIntegration")
+		tflog.Debug(ctx, "createGithubProjectIntegration")
 
 		githubFormValues := unpackGithubFormValues(data)
 		setUniqueIntegrationNameAndId(data, "github", 20)
@@ -86,7 +86,7 @@ func pipelineGithubProjectIntegrationResource() *schema.Resource {
 	}
 
 	var updateGithubProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] updateGithubProjectIntegration")
+		tflog.Debug(ctx, "updateGithubProjectIntegration")
 
 		githubFormValues := unpackGithubFormValues(data)
 		err := updateProjectIntegration(data, m, githubFormValues)

@@ -2,8 +2,8 @@ package pipeline
 
 import (
 	"context"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -37,7 +37,7 @@ func pipelineKubernetesProjectIntegrationResource() *schema.Resource {
 	}
 
 	var readKubernetesProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] readKubernetesProjectIntegration")
+		tflog.Debug(ctx, "readKubernetesProjectIntegration")
 		_, err := readProjectIntegration(data, m)
 		if err != nil {
 			return diag.FromErr(err)
@@ -47,7 +47,7 @@ func pipelineKubernetesProjectIntegrationResource() *schema.Resource {
 	}
 
 	var createKubernetesProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] createKubernetesProjectIntegration")
+		tflog.Debug(ctx, "createKubernetesProjectIntegration")
 
 		kubernetesFormValues := unpackKubernetesFormValues(data)
 		setUniqueIntegrationNameAndId(data, "kubernetesConfig", 86)
@@ -60,7 +60,7 @@ func pipelineKubernetesProjectIntegrationResource() *schema.Resource {
 	}
 
 	var updateKubernetesProjectIntegration = func(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-		log.Printf("[DEBUG] updateKubernetesProjectIntegration")
+		tflog.Debug(ctx, "updateKubernetesProjectIntegration")
 
 		kubernetesFormValues := unpackKubernetesFormValues(data)
 		err := updateProjectIntegration(data, m, kubernetesFormValues)

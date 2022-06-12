@@ -2,8 +2,6 @@ package pipeline
 
 import (
 	"context"
-	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -100,7 +98,6 @@ func unpackProject(data *util.ResourceData, key string) ProjectJSON {
 
 func packProject(d *schema.ResourceData, schemaKey string, project ProjectJSON) []error {
 	var errors []error
-	log.Println("[DEBUG] packProject", project)
 	if (ProjectJSON{}) == project {
 		return errors
 	}
@@ -146,16 +143,13 @@ func setUniqueIntegrationNameAndId(d *schema.ResourceData, name string, id int) 
 }
 
 func readProjectIntegration(data *schema.ResourceData, m interface{}) ([]FormJSONValues, error) {
-	log.Printf("[DEBUG] readProjectIntegration")
 	projectIntegration := ProjectIntegration{}
-	resp, err := m.(*resty.Client).R().
+	_, err := m.(*resty.Client).R().
 		SetResult(&projectIntegration).
 		Get(projectIntegrationsUrl + "/" + data.Id())
-	log.Println("[DEBUG] projectIntegration body: ", string(json.RawMessage(resp.Body())))
 	if err != nil {
 		return nil, err
 	}
-	log.Println("[DEBUG] projectIntegration Obj: ", projectIntegration)
 	errors := packProjectIntegration(data, projectIntegration)
 	if len(errors) > 0 {
 		return nil, errors[0]
@@ -164,8 +158,6 @@ func readProjectIntegration(data *schema.ResourceData, m interface{}) ([]FormJSO
 }
 
 func createProjectIntegration(data *schema.ResourceData, m interface{}, formValues []FormJSONValues) error {
-	log.Printf("[DEBUG] createProjectIntegration")
-	log.Printf("[TRACE] %+v\n", data)
 
 	projectIntegration, err := unpackProjectIntegration(data, formValues)
 	if err != nil {
@@ -185,8 +177,6 @@ func createProjectIntegration(data *schema.ResourceData, m interface{}, formValu
 }
 
 func updateProjectIntegration(data *schema.ResourceData, m interface{}, formValues []FormJSONValues) error {
-	log.Printf("[DEBUG] updateProjectIntegration")
-	log.Printf("[TRACE] %+v\n", data)
 
 	projectIntegration, err := unpackProjectIntegration(data, formValues)
 	if err != nil {
@@ -202,8 +192,6 @@ func updateProjectIntegration(data *schema.ResourceData, m interface{}, formValu
 }
 
 func deleteProjectIntegration(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[DEBUG] deleteProjectIntegration")
-	log.Printf("[TRACE] %+v\n", data)
 
 	resp, err := m.(*resty.Client).R().
 		Delete(projectIntegrationsUrl + "/" + data.Id())
