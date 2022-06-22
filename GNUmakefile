@@ -1,15 +1,21 @@
 TEST?=./...
-TARGET_ARCH?=darwin_amd64
+GO_ARCH=$(shell go env GOARCH)
+TARGET_ARCH=$(shell go env GOOS)_${GO_ARCH}
+ifeq ($(GO_ARCH), amd64)
+GORELEASER_ARCH=${TARGET_ARCH}_$(shell go env GOAMD64)
+endif
 PKG_NAME=pkg/pipeline
+# if this path ever changes, you need to also update the 'ldflags' value in .goreleaser.yml
 PKG_VERSION_PATH=github.com/jfrog/terraform-provider-pipeline/${PKG_NAME}
 VERSION := $(shell git tag --sort=-creatordate | head -1 | sed  -n 's/v\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1.\2.\3/p')
 NEXT_VERSION := $(shell echo ${VERSION}| awk -F '.' '{print $$1 "." $$2 "." $$3 +1 }' )
 BUILD_PATH=terraform.d/plugins/registry.terraform.io/jfrog/pipeline/${NEXT_VERSION}/${TARGET_ARCH}
 
 install:
+	rm -fR terraform.d && \
 	mkdir -p ${BUILD_PATH} && \
-		(test -f terraform-provider-pipeline || go build -ldflags="-X '${PKG_VERSION_PATH}.Version=${NEXT_VERSION}'") && \
-		mv terraform-provider-pipeline ${BUILD_PATH} && \
+		(test -f terraform-provider-pipeline || GORELEASER_CURRENT_TAG=${NEXT_VERSION} goreleaser build --single-target --rm-dist --snapshot) && \
+		mv -v dist/terraform-provider-pipeline_${GORELEASER_ARCH}/terraform-provider-pipeline_v${NEXT_VERSION}* ${BUILD_PATH} && \
 		rm -f .terraform.lock.hcl && \
 		sed -i.bak -E '0,/version = ".*"/ s/version = ".*"/version = "${NEXT_VERSION}"/' sample.tf && rm sample.tf.bak && \
 		terraform init
@@ -22,13 +28,7 @@ release:
 	@echo "Pushed v${NEXT_VERSION}"
 
 build: fmtcheck
-	go build -ldflags="-X '${PKG_VERSION_PATH}.Version=${NEXT_VERSION}'"
-
-debug_install:
-	mkdir -p ${BUILD_PATH} && \
-		(test -f terraform-provider-pipeline || go build -gcflags "all=-N -l" -ldflags="-X '${PKG_VERSION_PATH}.Version=${NEXT_VERSION}-develop'") && \
-		mv terraform-provider-pipeline ${BUILD_PATH} && \
-		terraform init
+	GORELEASER_CURRENT_TAG=${NEXT_VERSION} goreleaser build --single-target --rm-dist --snapshot
 
 test:
 	@echo "==> Starting unit tests"
