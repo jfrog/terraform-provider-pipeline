@@ -1,3 +1,10 @@
+
+## 1.0.2 (June 21, 2022)
+
+IMPROVEMENTS:
+
+* Bump shared module version
+
 ## 1.0.1 (May 27, 2022)
 
 IMPROVEMENTS:
