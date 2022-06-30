@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/terraform-plugin-docs v0.8.1
 	github.com/hashicorp/terraform-plugin-log v0.4.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.16.0
-	github.com/jfrog/terraform-provider-shared v1.1.1
+	github.com/jfrog/terraform-provider-shared v1.4.0
 )
 
 require (
