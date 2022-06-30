@@ -1,3 +1,8 @@
+## 1.0.3 (July 1, 2022)
+
+BUG FIXES:
+
+* provider: Fix hardcoded HTTP user-agent string. PR: [#8](https://github.com/jfrog/terraform-provider-pipeline/pull/8)
 
 ## 1.0.2 (June 21, 2022)
 
