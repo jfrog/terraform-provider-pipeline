@@ -40,7 +40,7 @@ func pipelineNodeResource() *schema.Resource {
 		"friendly_name": {
 			Type:         schema.TypeString,
 			Required:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "The name of the node. Should be prefixed with the project key",
 		},
 		"project_id": {
@@ -68,7 +68,7 @@ func pipelineNodeResource() *schema.Resource {
 		"ip_address": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			Description:  "Node address for auto-initialization.",
 		},
 		"is_swap_enabled": {
