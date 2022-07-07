@@ -160,7 +160,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 	}
 
 	var unpackProjectIntegration = func(data *schema.ResourceData) (ProjectIntegration, error) {
-		d := &util.ResourceData{data}
+		d := &util.ResourceData{ResourceData: data}
 
 		projectIntegration := ProjectIntegration{
 			Name:                  d.GetString("name", false),
