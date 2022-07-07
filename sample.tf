@@ -2,15 +2,15 @@ terraform {
   required_providers {
     pipeline = {
       source  = "registry.terraform.io/jfrog/pipeline"
-      version = "0.1.1"
+      version = "1.0.1"
     }
     project = {
       source  = "registry.terraform.io/jfrog/project"
-      version = "1.1.0"
+      version = "1.1.3"
     }
     artifactory = {
       source  = "registry.terraform.io/jfrog/artifactory"
-      version = "6.7.1"
+      version = "6.10.1"
     }
   }
 }
@@ -21,18 +21,18 @@ variable "artifactory_url" {
 }
 
 provider "pipeline" {
-  url = "${var.artifactory_url}"
+  url = var.artifactory_url
 }
 
 provider "project" {
-  url = "${var.artifactory_url}"
+  url = var.artifactory_url
 }
 
 provider "artifactory" {
-  url = "${var.artifactory_url}"
+  url = var.artifactory_url
 }
 
-# Atifactory resources
+# Artifactory resources
 
 resource "artifactory_local_docker_v2_repository" "docker-local" {
   key             = "docker-v2-local"
