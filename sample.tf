@@ -6,25 +6,33 @@ terraform {
     }
     project = {
       source  = "registry.terraform.io/jfrog/project"
-      version = "1.1.0"
+      version = "1.1.3"
     }
     artifactory = {
       source  = "registry.terraform.io/jfrog/artifactory"
-      version = "6.7.1"
+      version = "6.10.1"
     }
   }
 }
 
+variable "artifactory_url" {
+  type = string
+  default = "http://localhost:8081"
+}
+
 provider "pipeline" {
+  url = var.artifactory_url
 }
 
 provider "project" {
+  url = var.artifactory_url
 }
 
 provider "artifactory" {
+  url = var.artifactory_url
 }
 
-# Atifactory resources
+# Artifactory resources
 
 resource "artifactory_local_docker_v2_repository" "docker-local" {
   key             = "docker-v2-local"

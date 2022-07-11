@@ -1,3 +1,9 @@
+## 1.0.4 (July 11, 2022)
+
+BUG FIXES:
+
+* Updated makefile to be consistent with others. Issue: [#10](https://github.com/jfrog/terraform-provider-pipeline/issues/10) PR: [#13](https://github.com/jfrog/terraform-provider-pipeline/pull/13)
+
 ## 1.0.3 (July 1, 2022)
 
 BUG FIXES:
