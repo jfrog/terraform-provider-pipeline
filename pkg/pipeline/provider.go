@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -60,6 +61,8 @@ func Provider() *schema.Provider {
 	}
 
 	p.ConfigureContextFunc = func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		tflog.Info(ctx, fmt.Sprintf("Provider version: %s", Version))
+
 		terraformVersion := p.TerraformVersion
 		if terraformVersion == "" {
 			terraformVersion = "0.13+compatible"
@@ -76,7 +79,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 		return nil, diag.Errorf("you must supply a URL")
 	}
 
-	restyBase, err := client.Build(URL.(string), Version)
+	restyBase, err := client.Build(URL.(string), productId)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
