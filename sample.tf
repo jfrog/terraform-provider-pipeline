@@ -2,7 +2,7 @@ terraform {
   required_providers {
     pipeline = {
       source  = "registry.terraform.io/jfrog/pipeline"
-      version = "0.1.1"
+      version = "1.0.1"
     }
     project = {
       source  = "registry.terraform.io/jfrog/project"
@@ -21,15 +21,15 @@ variable "artifactory_url" {
 }
 
 provider "pipeline" {
-  url = "${var.artifactory_url}"
+  url = var.artifactory_url
 }
 
 provider "project" {
-  url = "${var.artifactory_url}"
+  url = var.artifactory_url
 }
 
 provider "artifactory" {
-  url = "${var.artifactory_url}"
+  url = var.artifactory_url
 }
 
 # Atifactory resources
