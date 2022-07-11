@@ -1,8 +1,7 @@
 ## 1.0.4 (July 11, 2022)
 BUG FIXES:
 
-* updated to latest shared provider (internal ticket)
-* update makefile to be consistent with other providers. Still doesn't do version substitution correctly PR: [#47](https://github.com/jfrog/terraform-provider-project/pull/47)
+* updated to latest shared provider (internal ticket) [#12](https://github.com/jfrog/terraform-provider-pipeline/pull/12)
 
 ## 1.0.3 (July 1, 2022)
 
