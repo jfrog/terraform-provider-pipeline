@@ -15,7 +15,7 @@ import (
 	"github.com/jfrog/terraform-provider-shared/util"
 )
 
-// Project GET {{ host }}/access/api/v1/projects/{{prjKey}}/
+// PipelineSource  GET {{ host }}/access/api/v1/projects/{{prjKey}}/
 //GET {{ host }}/artifactory/api/repositories/?prjKey={{prjKey}}
 type PipelineSource struct {
 	//Project                   string          `json:"project"`
@@ -112,7 +112,7 @@ func pipelineSourceResource() *schema.Resource {
 	}
 
 	var unpackPipelineSource = func(data *schema.ResourceData) (PipelineSource, error) {
-		d := &util.ResourceData{data}
+		d := &util.ResourceData{ResourceData: data}
 
 		pipelineSource := PipelineSource{
 			ProjectId:            d.GetInt("project_id", false),

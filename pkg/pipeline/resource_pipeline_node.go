@@ -84,7 +84,7 @@ func pipelineNodeResource() *schema.Resource {
 	}
 
 	var unpackNode = func(data *schema.ResourceData) (Node, error) {
-		d := &util.ResourceData{data}
+		d := &util.ResourceData{ResourceData: data}
 
 		node := Node{
 			FriendlyName:      d.GetString("friendly_name", false),

@@ -87,7 +87,7 @@ func pipelineNodePoolResource() *schema.Resource {
 	}
 
 	var unpackNodePool = func(data *schema.ResourceData) (NodePool, error) {
-		d := &util.ResourceData{data}
+		d := &util.ResourceData{ResourceData: data}
 
 		nodePool := NodePool{
 			ProjectId:              d.GetInt("project_id", false),
