@@ -1,3 +1,8 @@
+## 1.0.5 (August 9, 2022)
+
+IMPROVEMENTS:
+* Update package `github.com/Masterminds/goutils` to 1.1.1 for [Dependeabot alert](https://github.com/jfrog/terraform-provider-pipeline/security/dependabot/3)
+
 ## 1.0.4 (July 11, 2022)
 
 BUG FIXES:
