@@ -33,7 +33,7 @@ In general, this project follows [Terraform Versioning Specification](https://ww
 
 ## Contributors
 
-See the [contribution guide](https://github.com/jfrog/terraform-provider-pipeline/blob/master/CONTRIBUTIONS.md).
+See the [contribution guide](CONTRIBUTIONS.md).
 
 ## License
 
