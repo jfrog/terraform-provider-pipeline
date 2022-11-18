@@ -145,14 +145,40 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		return formJSONValues
 	}
 
-	var packFormJSONValues = func(d *schema.ResourceData, schemaKey string, formJSONValues []FormJSONValues) []error {
+	var lookupFormJsonValue = func(values []FormJSONValues, key string) FormJSONValues {
+		for _, value := range values {
+			if value.Label == key {
+				return value
+			}
+		}
+		return FormJSONValues{}
+	}
+
+	var packFormJSONValues = func(ctx context.Context, d *schema.ResourceData, schemaKey string, formJSONValues []FormJSONValues) []error {
 		setValue := util.MkLens(d)
 		var keyValues []interface{}
+		existingValues := unpackFormJSONValues(&util.ResourceData{ResourceData: d}, "form_json_values")
 		for _, idx := range formJSONValues {
 			keyValue := map[string]interface{}{
 				"label": idx.Label,
 				"value": idx.Value,
 			}
+			// the API will always return the redacted value. Putting this into tf-state will cause a diff every time
+			// as it tries to correct "***" -> "secret_val".
+			if idx.Value == "********" {
+				lookup := lookupFormJsonValue(existingValues, idx.Label)
+
+				if lookup.Value != "" {
+					tflog.Debug(ctx, "over-writing key value with existing data value", map[string]interface{}{
+						"label":    idx.Label,
+						"value":    idx.Value,
+						"override": lookup.Value,
+					})
+					keyValue["value"] = lookup.Value
+				}
+			}
+
+			tflog.Debug(ctx, "packFormJSONValues", keyValue)
 			keyValues = append(keyValues, keyValue)
 		}
 		errors := setValue(schemaKey, keyValues)
@@ -187,7 +213,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		errors = append(errors, setValue("environments", projectIntegration.Environments)...)
 		errors = append(errors, setValue("is_internal", projectIntegration.IsInternal)...)
 		errors = append(errors, packProject(ctx, d, "project", projectIntegration.Project)...)
-		errors = append(errors, packFormJSONValues(d, "form_json_values", projectIntegration.FormJSONValues)...)
+		errors = append(errors, packFormJSONValues(ctx, d, "form_json_values", projectIntegration.FormJSONValues)...)
 
 		if len(errors) > 0 {
 			return diag.Errorf("failed to pack project integration %q", errors)
