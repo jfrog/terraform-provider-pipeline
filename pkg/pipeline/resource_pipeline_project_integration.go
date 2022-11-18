@@ -40,6 +40,7 @@ type ProjectJSON struct {
 }
 
 const projectIntegrationsUrl = "pipelines/api/v1/projectintegrations"
+const redactedSecretValue = "********"
 
 func pipelineProjectIntegrationResource() *schema.Resource {
 
@@ -128,60 +129,6 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		}
 		setValue := util.MkLens(d)
 		errors = append(errors, setValue(schemaKey, project)...)
-		return errors
-	}
-
-	var unpackFormJSONValues = func(d *util.ResourceData, key string) []FormJSONValues {
-		var formJSONValues []FormJSONValues
-		keyValues := d.Get(key).([]interface{})
-		for _, keyValue := range keyValues {
-			idx := keyValue.(map[string]interface{})
-			formJSONValue := FormJSONValues{
-				Label: idx["label"].(string),
-				Value: idx["value"].(string),
-			}
-			formJSONValues = append(formJSONValues, formJSONValue)
-		}
-		return formJSONValues
-	}
-
-	var lookupFormJsonValue = func(values []FormJSONValues, key string) FormJSONValues {
-		for _, value := range values {
-			if value.Label == key {
-				return value
-			}
-		}
-		return FormJSONValues{}
-	}
-
-	var packFormJSONValues = func(ctx context.Context, d *schema.ResourceData, schemaKey string, formJSONValues []FormJSONValues) []error {
-		setValue := util.MkLens(d)
-		var keyValues []interface{}
-		existingValues := unpackFormJSONValues(&util.ResourceData{ResourceData: d}, "form_json_values")
-		for _, idx := range formJSONValues {
-			keyValue := map[string]interface{}{
-				"label": idx.Label,
-				"value": idx.Value,
-			}
-			// the API will always return the redacted value. Putting this into tf-state will cause a diff every time
-			// as it tries to correct "***" -> "secret_val".
-			if idx.Value == "********" {
-				lookup := lookupFormJsonValue(existingValues, idx.Label)
-
-				if lookup.Value != "" {
-					tflog.Debug(ctx, "over-writing key value with existing data value", map[string]interface{}{
-						"label":    idx.Label,
-						"value":    idx.Value,
-						"override": lookup.Value,
-					})
-					keyValue["value"] = lookup.Value
-				}
-			}
-
-			tflog.Debug(ctx, "packFormJSONValues", keyValue)
-			keyValues = append(keyValues, keyValue)
-		}
-		errors := setValue(schemaKey, keyValues)
 		return errors
 	}
 
@@ -307,4 +254,58 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		Schema:      projectIntegrationSchema,
 		Description: "Provides an Jfrog Pipelines Project Integration resource.",
 	}
+}
+
+func unpackFormJSONValues(d *util.ResourceData, key string) []FormJSONValues {
+	var formJSONValues []FormJSONValues
+	keyValues := d.Get(key).([]interface{})
+	for _, keyValue := range keyValues {
+		idx := keyValue.(map[string]interface{})
+		formJSONValue := FormJSONValues{
+			Label: idx["label"].(string),
+			Value: idx["value"].(string),
+		}
+		formJSONValues = append(formJSONValues, formJSONValue)
+	}
+	return formJSONValues
+}
+
+func lookupFormJSONValue(values []FormJSONValues, key string) FormJSONValues {
+	for _, value := range values {
+		if value.Label == key {
+			return value
+		}
+	}
+	return FormJSONValues{}
+}
+
+func packFormJSONValues(ctx context.Context, d *schema.ResourceData, schemaKey string, formJSONValues []FormJSONValues) []error {
+	setValue := util.MkLens(d)
+	var keyValues []interface{}
+	existingValues := unpackFormJSONValues(&util.ResourceData{ResourceData: d}, "form_json_values")
+	for _, idx := range formJSONValues {
+		keyValue := map[string]interface{}{
+			"label": idx.Label,
+			"value": idx.Value,
+		}
+		// the API will always return the redacted value. Putting this into tf-state will cause a diff every time
+		// as it tries to correct "***" -> "secret_val".
+		if idx.Value == "********" {
+			lookup := lookupFormJSONValue(existingValues, idx.Label)
+
+			if lookup.Value != "" {
+				tflog.Debug(ctx, "over-writing key value with existing data value", map[string]interface{}{
+					"label":    idx.Label,
+					"value":    idx.Value,
+					"override": lookup.Value,
+				})
+				keyValue["value"] = lookup.Value
+			}
+		}
+
+		tflog.Debug(ctx, "packFormJSONValues", keyValue)
+		keyValues = append(keyValues, keyValue)
+	}
+	errors := setValue(schemaKey, keyValues)
+	return errors
 }
