@@ -30,8 +30,13 @@ type ProjectIntegration struct {
 }
 
 type FormJSONValues struct {
-	Label string `json:"label"`
-	Value string `json:"value"`
+	Label     string `json:"label"`
+	Value     string `json:"value"`
+	Sensitive bool
+}
+
+func (f FormJSONValues) Id() string {
+	return f.Label
 }
 
 type ProjectJSON struct {
@@ -40,7 +45,6 @@ type ProjectJSON struct {
 }
 
 const projectIntegrationsUrl = "pipelines/api/v1/projectintegrations"
-const redactedSecretValue = "********"
 
 func pipelineProjectIntegrationResource() *schema.Resource {
 
@@ -92,6 +96,11 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 						Type:        schema.TypeString,
 						Required:    true,
 						Description: "Value of the input property.",
+					},
+					"is_sensitive": {
+						Type:        schema.TypeBool,
+						Optional:    true,
+						Description: "Is the underlying Value sensitive or not",
 					},
 				},
 			},
@@ -160,6 +169,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		errors = append(errors, setValue("environments", projectIntegration.Environments)...)
 		errors = append(errors, setValue("is_internal", projectIntegration.IsInternal)...)
 		errors = append(errors, packProject(ctx, d, "project", projectIntegration.Project)...)
+		errors = append(errors, packFormJSONValues(ctx, d, "form_json_values", projectIntegration.FormJSONValues)...)
 
 		if len(errors) > 0 {
 			return diag.Errorf("failed to pack project integration %q", errors)
@@ -261,10 +271,40 @@ func unpackFormJSONValues(d *util.ResourceData, key string) []FormJSONValues {
 	for _, keyValue := range keyValues {
 		idx := keyValue.(map[string]interface{})
 		formJSONValue := FormJSONValues{
-			Label: idx["label"].(string),
-			Value: idx["value"].(string),
+			Label:     idx["label"].(string),
+			Value:     idx["value"].(string),
+			Sensitive: idx["is_sensitive"].(bool),
 		}
 		formJSONValues = append(formJSONValues, formJSONValue)
 	}
 	return formJSONValues
+}
+func packFormJSONValues(ctx context.Context, d *schema.ResourceData, schemaKey string, formJSONValues []FormJSONValues) []error {
+	setValue := util.MkLens(d)
+	var keyValues []interface{}
+	existingValues := unpackFormJSONValues(&util.ResourceData{ResourceData: d}, "form_json_values")
+
+	for _, idx := range formJSONValues {
+		keyValue := map[string]interface{}{
+			"label":        idx.Label,
+			"value":        idx.Value,
+			"is_sensitive": idx.Sensitive,
+		}
+
+		lookup := FindConfigurationById(existingValues, idx.Label)
+		// the API will always return the redacted value. Putting this into tf-state will cause a diff every time
+		// as it tries to correct "***" -> "secret_val".
+		if lookup != nil && lookup.Sensitive {
+			if lookup.Value != "" {
+				keyValue["value"] = lookup.Value
+			}
+			//the incoming `idx` value will always be false, the JFrog API has no concept of this field
+			keyValue["is_sensitive"] = true
+		}
+
+		tflog.Debug(ctx, "packFormJSONValues", keyValue)
+		keyValues = append(keyValues, keyValue)
+	}
+	errors := setValue(schemaKey, keyValues)
+	return errors
 }
