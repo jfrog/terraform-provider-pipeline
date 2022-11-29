@@ -100,6 +100,7 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 					"is_sensitive": {
 						Type:        schema.TypeBool,
 						Optional:    true,
+						Default:     false,
 						Description: "Is the underlying Value sensitive or not",
 					},
 				},
