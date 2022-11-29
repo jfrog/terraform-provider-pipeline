@@ -1,6 +1,13 @@
+## 1.1.0 (November 30, 2022)
+
+IMPROVEMENTS:
+
+* resource/pipeline_project_integration: Add support for specifying if a form JSON values from Pipeline integration contains sensitive value or not. This also fixes state drift issue. PR: [#16](https://github.com/jfrog/terraform-provider-pipeline/pull/16)
+
 ## 1.0.5 (August 9, 2022)
 
 IMPROVEMENTS:
+
 * Update package `github.com/Masterminds/goutils` to 1.1.1 for [Dependeabot alert](https://github.com/jfrog/terraform-provider-pipeline/security/dependabot/3)
 
 ## 1.0.4 (July 11, 2022)
