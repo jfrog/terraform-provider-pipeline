@@ -17,7 +17,6 @@ BUILD_PATH=terraform.d/plugins/registry.terraform.io/jfrog/${PRODUCT}/${NEXT_VER
 default: build
 
 install: clean build
-	rm -fR .terraform.d && \
 	mkdir -p ${BUILD_PATH} && \
 		mv -v dist/terraform-provider-${PRODUCT}_${GORELEASER_ARCH}/terraform-provider-${PRODUCT}_v${NEXT_VERSION}* ${BUILD_PATH} && \
 		rm -f .terraform.lock.hcl && \
