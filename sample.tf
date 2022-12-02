@@ -125,9 +125,10 @@ data "pipeline_project" "my-project" {
 }
 
 resource "pipeline_project_integration" "my-project-integration" {
-  name                    = "my-project-integration"
-  project                 = {
-    name = project.myproject.key
+  name = "my-project-integration"
+  project {
+    key  = project.myproject.key
+    name = project.myproject.display_name
   }
   master_integration_id   = 0
   master_integration_name = "my-master-integration"
@@ -140,15 +141,16 @@ resource "pipeline_project_integration" "my-project-integration" {
   }
 
   form_json_values {
-    label = "label-2"
-    value = "value-2"
+    label        = "label-2"
+    value        = "value-2"
+    is_sensitive = true
   }
 }
 
 resource "pipeline_source" "my-pipeline-source" {
   name                   = "my-pipeline-source"
-  project_id             = 0
-  project_integration_id = 0
+  project_id             = data.pipeline_project.my-project.id
+  project_integration_id = pipeline_project_integration.my-project-integration.id
   repository_full_name   = "myrepo/docker-sample"
   file_filter            = "pipelines.yml"
   is_multi_branch        = false
@@ -159,23 +161,23 @@ resource "pipeline_source" "my-pipeline-source" {
   template_id            = 0
 }
 
-resource "pipeline_node" "my-node" {
-  friendly_name       = "my-node"
-  project_id          = 0
-  node_pool_id        = 0
-  is_on_demand        = true
-  is_auto_initialized = true
-  ip_address          = "10.0.0.1"
-  is_swap_enabled     = true
-}
-
 resource "pipeline_node_pool" "my-node-pool" {
   name                       = "my-node-pool"
-  project_id                 = 0
+  project_id                 = data.pipeline_project.my-project.id
   number_of_nodes            = 1
   is_on_demand               = true
   architecture               = "x86_64"
   operating_system           = "Ubuntu_18.04"
   node_idle_interval_in_mins = 20
   environments               = ["DEV"]
+}
+
+resource "pipeline_node" "my-node" {
+  friendly_name       = "my-node"
+  project_id          = data.pipeline_project.my-project.id
+  node_pool_id        = pipeline_node_pool.my-node-pool.id
+  is_on_demand        = true
+  is_auto_initialized = true
+  ip_address          = "10.0.0.1"
+  is_swap_enabled     = true
 }
