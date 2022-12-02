@@ -313,7 +313,7 @@ func PipelineProjectIntegrationResource() *schema.Resource {
 				Version: 1,
 			},
 		},
-		Description: "Provides an Jfrog Pipelines Project Integration resource.",
+		Description: "Provides an JFrog Pipelines Project Integration resource.",
 	}
 }
 

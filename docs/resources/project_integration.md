@@ -3,21 +3,22 @@
 page_title: "pipeline_project_integration Resource - terraform-provider-pipeline"
 subcategory: ""
 description: |-
-  Provides an Jfrog Pipelines Project Integration resource.
+  Provides an JFrog Pipelines Project Integration resource.
 ---
 
 # pipeline_project_integration (Resource)
 
-Provides an Jfrog Pipelines Project Integration resource.
+Provides an JFrog Pipelines Project Integration resource.
 
 ## Example Usage
 
 ```terraform
 resource "pipeline_project_integration" "my-project-integration" {
-  name                    = "my-project-integration"
-  project_id              = 0
-  project                 = {
-      name = "my-project"
+  name       = "my-project-integration"
+  project_id = 0
+  project {
+    key = "myproj"
+    name = "my-project"
   }
   master_integration_id   = 0
   master_integration_name = "my-master-integration"
@@ -50,7 +51,7 @@ resource "pipeline_project_integration" "my-project-integration" {
 - `environments` (List of String) In a project, an array of environment names in which this pipeline source will be.
 - `is_internal` (Boolean) Set this as false to create a Pipelines integration.
 - `master_integration_name` (String) The name of the master integration.
-- `project` (Map of String) An object containing a project name as an alternative to projectId. The following properties can be set: name, key
+- `project` (Block Set, Max: 1) An object containing a project name as an alternative to projectId. (see [below for nested schema](#nestedblock--project))
 - `project_id` (Number) Id of the project.
 
 ### Read-Only
@@ -64,5 +65,18 @@ Required:
 
 - `label` (String) Key or label of the input property.
 - `value` (String) Value of the input property.
+
+Optional:
+
+- `is_sensitive` (Boolean) Is the underlying Value sensitive or not
+
+
+<a id="nestedblock--project"></a>
+### Nested Schema for `project`
+
+Required:
+
+- `key` (String) Key of the project
+- `name` (String) Name of the project
 
 

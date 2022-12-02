@@ -3,12 +3,12 @@
 page_title: "pipeline_source Resource - terraform-provider-pipeline"
 subcategory: ""
 description: |-
-  Provides an Jfrog Pipelines Pipeline Source resource.
+  Provides an JFrog Pipelines Source resource.
 ---
 
 # pipeline_source (Resource)
 
-Provides an Jfrog Pipelines Pipeline Source resource.
+Provides an JFrog Pipelines Source resource.
 
 ## Example Usage
 
