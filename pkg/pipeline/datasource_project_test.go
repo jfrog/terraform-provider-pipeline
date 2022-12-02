@@ -14,7 +14,7 @@ import (
 	"github.com/jfrog/terraform-provider-shared/util"
 )
 
-func TestDatasourceProject(t *testing.T) {
+func TestAccDatasourceProject(t *testing.T) {
 	var integrationId int
 
 	rand.Seed(time.Now().UnixNano())
@@ -77,7 +77,7 @@ func TestDatasourceProject_notFound(t *testing.T) {
 		ProviderFactories: acctest.ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: config,
+				Config:      config,
 				ExpectError: regexp.MustCompile(fmt.Sprintf(".*no project found with name '%s'", projectKey)),
 			},
 		},

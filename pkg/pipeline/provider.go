@@ -46,7 +46,7 @@ func Provider() *schema.Provider {
 			productId,
 			map[string]*schema.Resource{
 				"pipeline_source":              pipelineSourceResource(),
-				"pipeline_project_integration": pipelineProjectIntegrationResource(),
+				"pipeline_project_integration": PipelineProjectIntegrationResource(),
 				"pipeline_node_pool":           pipelineNodePoolResource(),
 				"pipeline_node":                pipelineNodeResource(),
 			},
