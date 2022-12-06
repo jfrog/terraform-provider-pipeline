@@ -32,7 +32,7 @@ type ProjectIntegration struct {
 type FormJSONValues struct {
 	Label     string `json:"label"`
 	Value     string `json:"value"`
-	Sensitive bool
+	Sensitive bool   `json:"-"`
 }
 
 func (f FormJSONValues) Id() string {
@@ -46,100 +46,130 @@ type ProjectJSON struct {
 
 const projectIntegrationsUrl = "pipelines/api/v1/projectintegrations"
 
-func pipelineProjectIntegrationResource() *schema.Resource {
+var baseProjectIntegrationSchema = map[string]*schema.Schema{
+	"name": {
+		Type:         schema.TypeString,
+		Required:     true,
+		ValidateFunc: validation.StringIsNotEmpty,
+		Description:  "The name of the project integration. Should be prefixed with the project key",
+	},
 
-	var projectIntegrationSchema = map[string]*schema.Schema{
-		"name": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
-			Description:  "The name of the project integration. Should be prefixed with the project key",
-		},
-
-		"project_id": {
-			Type:         schema.TypeInt,
-			Optional:     true,
-			ValidateFunc: validation.IntAtLeast(0),
-			Description:  "Id of the project.",
-		},
-		"project": {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Description: "An object containing a project name as an alternative to projectId. The following properties can be set: name, key",
-		},
-		"master_integration_id": {
-			Type:         schema.TypeInt,
-			Required:     true,
-			ValidateFunc: validation.IntAtLeast(0),
-			Description:  "The Id of the master integration.",
-		},
-		"master_integration_name": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
-			Description:  "The name of the master integration.",
-		},
-		"form_json_values": {
-			Type:     schema.TypeList,
-			Required: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"label": {
-						Type:        schema.TypeString,
-						Required:    true,
-						Description: "Key or label of the input property.",
-					},
-					"value": {
-						Type:        schema.TypeString,
-						Required:    true,
-						Description: "Value of the input property.",
-					},
-					"is_sensitive": {
-						Type:        schema.TypeBool,
-						Optional:    true,
-						Default:     false,
-						Description: "Is the underlying Value sensitive or not",
-					},
+	"project_id": {
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.IntAtLeast(0),
+		Description:  "Id of the project.",
+	},
+	"master_integration_id": {
+		Type:         schema.TypeInt,
+		Required:     true,
+		ValidateFunc: validation.IntAtLeast(0),
+		Description:  "The Id of the master integration.",
+	},
+	"master_integration_name": {
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringIsNotEmpty,
+		Description:  "The name of the master integration.",
+	},
+	"form_json_values": {
+		Type:     schema.TypeList,
+		Required: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"label": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "Key or label of the input property.",
+				},
+				"value": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "Value of the input property.",
+				},
+				"is_sensitive": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Default:     false,
+					Description: "Is the underlying Value sensitive or not",
 				},
 			},
-			Description: "Multiple objects with the values for the integration.",
 		},
-		"environments": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Description: "In a project, an array of environment names in which this pipeline source will be.",
+		Description: "Multiple objects with the values for the integration.",
+	},
+	"environments": {
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
 		},
-		"is_internal": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Description: "Set this as false to create a Pipelines integration.",
-		},
-	}
+		Description: "In a project, an array of environment names in which this pipeline source will be.",
+	},
+	"is_internal": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: "Set this as false to create a Pipelines integration.",
+	},
+}
 
-	var unpackProject = func(d *util.ResourceData, key string) ProjectJSON {
+func PipelineProjectIntegrationResource() *schema.Resource {
+
+	var projectIntegrationSchemaV1 = util.MergeMaps(
+		baseProjectIntegrationSchema,
+		map[string]*schema.Schema{
+			"project": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "An object containing a project name as an alternative to projectId. The following properties can be set: name, key",
+			},
+		},
+	)
+
+	var projectIntegrationSchemaV2 = util.MergeMaps(
+		baseProjectIntegrationSchema,
+		map[string]*schema.Schema{
+			"project": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+							Description:      "Name of the project",
+						},
+						"key": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+							Description:      "Key of the project",
+						},
+					},
+				},
+				Description: "An object containing a project name as an alternative to projectId.",
+			},
+		},
+	)
+
+	var unpackProject = func(d *util.ResourceData) ProjectJSON {
 		var project ProjectJSON
-		input := d.Get(key).(map[string]interface{})
-		project.Key = input["key"].(string)
-		project.Name = input["name"].(string)
+		if v, ok := d.GetOk("project"); ok {
+			sets := v.(*schema.Set).List()
+			if len(sets) == 0 {
+				return project
+			}
+			value := sets[0].(map[string]interface{})
+			project.Key = value["key"].(string)
+			project.Name = value["name"].(string)
+		}
 
 		return project
-	}
-
-	var packProject = func(ctx context.Context, d *schema.ResourceData, schemaKey string, project ProjectJSON) []error {
-		var errors []error
-		tflog.Debug(ctx, fmt.Sprintf("packProject %v", project))
-		if (ProjectJSON{}) == project {
-			return errors
-		}
-		setValue := util.MkLens(d)
-		errors = append(errors, setValue(schemaKey, project)...)
-		return errors
 	}
 
 	var unpackProjectIntegration = func(data *schema.ResourceData) (ProjectIntegration, error) {
@@ -152,25 +182,22 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			MasterIntegrationName: d.GetString("master_integration_name", false),
 			Environments:          d.GetList("environments"),
 			IsInternal:            d.GetBool("is_internal", false),
-			Project:               unpackProject(d, "project"),
-			FormJSONValues:        unpackFormJSONValues(d, "form_json_values"),
+			Project:               unpackProject(d),
+			FormJSONValues:        UnpackFormJSONValues(d, "form_json_values"),
 		}
 		return projectIntegration, nil
 	}
 
 	var packProjectIntegration = func(ctx context.Context, d *schema.ResourceData, projectIntegration ProjectIntegration) diag.Diagnostics {
-		var errors []error
 		setValue := util.MkLens(d)
 
-		errors = setValue("project_id", projectIntegration.ProjectId)
-		errors = append(errors, setValue("name", projectIntegration.Name)...)
-		errors = append(errors, setValue("project_id", projectIntegration.ProjectId)...)
-		errors = append(errors, setValue("master_integration_id", projectIntegration.MasterIntegrationId)...)
-		errors = append(errors, setValue("master_integration_name", projectIntegration.MasterIntegrationName)...)
-		errors = append(errors, setValue("environments", projectIntegration.Environments)...)
-		errors = append(errors, setValue("is_internal", projectIntegration.IsInternal)...)
-		errors = append(errors, packProject(ctx, d, "project", projectIntegration.Project)...)
-		errors = append(errors, packFormJSONValues(ctx, d, "form_json_values", projectIntegration.FormJSONValues)...)
+		setValue("name", projectIntegration.Name)
+		setValue("project_id", projectIntegration.ProjectId)
+		setValue("master_integration_id", projectIntegration.MasterIntegrationId)
+		setValue("master_integration_name", projectIntegration.MasterIntegrationName)
+		setValue("environments", projectIntegration.Environments)
+		setValue("is_internal", projectIntegration.IsInternal)
+		errors := PackFormJSONValues(ctx, d, "form_json_values", projectIntegration.FormJSONValues)
 
 		if len(errors) > 0 {
 			return diag.Errorf("failed to pack project integration %q", errors)
@@ -250,8 +277,24 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 		return nil
 	}
 
+	resourceV1 := &schema.Resource{
+		Schema: projectIntegrationSchemaV1,
+	}
+
+	var resourceStateUpgradeV1 = func(ctx context.Context, rawState map[string]any, meta any) (map[string]any, error) {
+		// Convert from a TypeMap (i.e. map[string]any) to TypeSet of 1 item (i.e. []map[string]interface)
+		oldProjectState := rawState["project"].(map[string]interface{})
+		rawState["project"] = []map[string]interface{}{
+			{
+				"key":  oldProjectState["key"],
+				"name": oldProjectState["name"],
+			},
+		}
+
+		return rawState, nil
+	}
+
 	return &schema.Resource{
-		SchemaVersion: 1,
 		CreateContext: createProjectIntegration,
 		ReadContext:   readProjectIntegration,
 		UpdateContext: updateProjectIntegration,
@@ -261,12 +304,20 @@ func pipelineProjectIntegrationResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Schema:      projectIntegrationSchema,
-		Description: "Provides an Jfrog Pipelines Project Integration resource.",
+		SchemaVersion: 2,
+		Schema:        projectIntegrationSchemaV2,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceV1.CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceStateUpgradeV1,
+				Version: 1,
+			},
+		},
+		Description: "Provides an JFrog Pipelines Project Integration resource.",
 	}
 }
 
-func unpackFormJSONValues(d *util.ResourceData, key string) []FormJSONValues {
+func UnpackFormJSONValues(d *util.ResourceData, key string) []FormJSONValues {
 	var formJSONValues []FormJSONValues
 	keyValues := d.Get(key).([]interface{})
 	for _, keyValue := range keyValues {
@@ -280,10 +331,11 @@ func unpackFormJSONValues(d *util.ResourceData, key string) []FormJSONValues {
 	}
 	return formJSONValues
 }
-func packFormJSONValues(ctx context.Context, d *schema.ResourceData, schemaKey string, formJSONValues []FormJSONValues) []error {
+
+func PackFormJSONValues(ctx context.Context, d *schema.ResourceData, schemaKey string, formJSONValues []FormJSONValues) []error {
 	setValue := util.MkLens(d)
 	var keyValues []interface{}
-	existingValues := unpackFormJSONValues(&util.ResourceData{ResourceData: d}, "form_json_values")
+	existingValues := UnpackFormJSONValues(&util.ResourceData{ResourceData: d}, "form_json_values")
 
 	for _, idx := range formJSONValues {
 		keyValue := map[string]interface{}{
@@ -306,6 +358,5 @@ func packFormJSONValues(ctx context.Context, d *schema.ResourceData, schemaKey s
 		tflog.Debug(ctx, "packFormJSONValues", keyValue)
 		keyValues = append(keyValues, keyValue)
 	}
-	errors := setValue(schemaKey, keyValues)
-	return errors
+	return setValue(schemaKey, keyValues)
 }

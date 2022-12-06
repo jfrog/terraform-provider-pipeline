@@ -23,7 +23,7 @@ data "pipeline_project" "my-project" {
 
 ### Required
 
-- `name` (String) The name of the project
+- `name` (String) The name of the project. Note: this is *not* the project key.
 
 ### Read-Only
 

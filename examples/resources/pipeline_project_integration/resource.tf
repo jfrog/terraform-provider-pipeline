@@ -1,8 +1,9 @@
 resource "pipeline_project_integration" "my-project-integration" {
-  name                    = "my-project-integration"
-  project_id              = 0
-  project                 = {
-      name = "my-project"
+  name       = "my-project-integration"
+  project_id = 0
+  project {
+    key = "myproj"
+    name = "my-project"
   }
   master_integration_id   = 0
   master_integration_name = "my-master-integration"

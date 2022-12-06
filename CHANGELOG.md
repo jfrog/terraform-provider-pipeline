@@ -1,3 +1,11 @@
+## 1.2.0 (December 6, 2022)
+
+BUG FIXES:
+* data source/pipeline_project: Fix crash when no Project is found.
+* resource/pipeline_project_integration: Fix crashes when either `key` or `name` attributes are not specified for `project` attribute. The `project` attribute changes from a map to a set (of 1 item) to allow for schema validation.
+
+Issue [#18](https://github.com/jfrog/terraform-provider-pipeline/issues/18) PR: [#19](https://github.com/jfrog/terraform-provider-pipeline/pull/19)
+
 ## 1.1.0 (November 30, 2022)
 
 IMPROVEMENTS:

@@ -26,7 +26,7 @@ func projectDataSource() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringIsNotEmpty,
-				Description:  "The name of the project",
+				Description:  "The name of the project. Note: this is *not* the project key.",
 			},
 		},
 
@@ -35,14 +35,20 @@ func projectDataSource() *schema.Resource {
 }
 
 func dataSourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	projectName := d.Get("name").(string)
 	var projects []Project
 	_, err := m.(*resty.Client).R().
 		SetResult(&projects).
-		SetPathParam("projectName", d.Get("name").(string)).
+		SetPathParam("projectName", projectName).
 		Get(projectsUrl)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	if len(projects) == 0 {
+		return diag.Errorf("no project found with name '%s'", projectName)
+	}
+
 	return packProject(projects[0], d)
 }
 

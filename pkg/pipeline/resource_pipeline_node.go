@@ -201,6 +201,6 @@ func pipelineNodeResource() *schema.Resource {
 		},
 
 		Schema:      nodeSchema,
-		Description: "Provides an Jfrog Pipelines Node resource.",
+		Description: "Provides an JFrog Pipelines Node resource.",
 	}
 }

@@ -3,12 +3,12 @@
 page_title: "pipeline_node Resource - terraform-provider-pipeline"
 subcategory: ""
 description: |-
-  Provides an Jfrog Pipelines Node resource.
+  Provides an JFrog Pipelines Node resource.
 ---
 
 # pipeline_node (Resource)
 
-Provides an Jfrog Pipelines Node resource.
+Provides an JFrog Pipelines Node resource.
 
 ## Example Usage
 
