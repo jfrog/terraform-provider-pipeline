@@ -1,7 +1,14 @@
+## 1.2.2 (February 23, 2023)
+
+SECURITY:
+* provider:
+  * Bumps golang.org/x/net from 0.0.0-20211029224645-99673261e6eb to 0.7.0. PR [#21](https://github.com/jfrog/terraform-provider-pipeline/pull/21)
+  * Bump golang.org/x/crypto from 0.0.0-20210921155107-089bfa567519 to 0.1.0. PR [#22](https://github.com/jfrog/terraform-provider-pipeline/pull/22)
+
 ## 1.2.1 (February 23, 2023)
 
 SECURITY:
-* provider: Bumps golang.org/x/text from 0.3.7 to 0.3.8. PR [#](https://github.com/jfrog/terraform-provider-pipeline/pull/20)
+* provider: Bumps golang.org/x/text from 0.3.7 to 0.3.8. PR [#20](https://github.com/jfrog/terraform-provider-pipeline/pull/20)
 
 ## 1.2.0 (December 6, 2022)
 
