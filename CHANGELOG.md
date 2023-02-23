@@ -1,3 +1,8 @@
+## 1.2.1 (February 23, 2023)
+
+SECURITY:
+* provider: Bumps golang.org/x/text from 0.3.7 to 0.3.8. PR [#](https://github.com/jfrog/terraform-provider-pipeline/pull/20)
+
 ## 1.2.0 (December 6, 2022)
 
 BUG FIXES:
