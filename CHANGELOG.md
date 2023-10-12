@@ -1,3 +1,9 @@
+## 1.2.3 (October 12, 2023)
+
+SECURITY:
+* provider:
+  * Bump golang.org/x/net from 0.7.0 to 0.17.0. PR [#26](https://github.com/jfrog/terraform-provider-pipeline/pull/26)
+
 ## 1.2.2 (February 23, 2023)
 
 SECURITY:
