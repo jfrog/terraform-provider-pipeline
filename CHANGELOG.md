@@ -1,3 +1,9 @@
+## 1.2.4 (October 30, 2023)
+
+SECURITY:
+* provider:
+  * Bump google.golang.org/grpc from 1.53.0 to 1.56.3 PR [#27](https://github.com/jfrog/terraform-provider-pipeline/pull/27)
+
 ## 1.2.3 (October 12, 2023)
 
 SECURITY:
