@@ -16,7 +16,7 @@ import (
 )
 
 // PipelineSource  GET {{ host }}/access/api/v1/projects/{{prjKey}}/
-//GET {{ host }}/artifactory/api/repositories/?prjKey={{prjKey}}
+// GET {{ host }}/artifactory/api/repositories/?prjKey={{prjKey}}
 type PipelineSource struct {
 	//Project                   string          `json:"project"`
 	Name                 string   `json:"name"`

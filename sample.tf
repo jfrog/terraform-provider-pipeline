@@ -1,16 +1,16 @@
 terraform {
   required_providers {
     pipeline = {
-      source  = "registry.terraform.io/jfrog/pipeline"
-      version = "1.0.2"
+      source  = "jfrog/pipeline"
+      version = "1.2.4"
     }
     project = {
-      source  = "registry.terraform.io/jfrog/project"
-      version = "1.1.3"
+      source  = "jfrog/project"
+      version = "1.5.1"
     }
     artifactory = {
-      source  = "registry.terraform.io/jfrog/artifactory"
-      version = "6.10.1"
+      source  = "jfrog/artifactory"
+      version = "10.3.3"
     }
   }
 }
