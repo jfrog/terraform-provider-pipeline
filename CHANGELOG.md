@@ -1,3 +1,38 @@
+## 1.2.5 (August 20, 2026)
+
+SECURITY:
+* provider:
+  * Remediate CVE-2026-39821 by upgrading Go to 1.25.13 and golang.org/x/net to v0.58.0.
+  * Remediate CVE-2026-56865 in Go.
+  * Remediate CVE-2026-56864 in Go.
+  * Remediate CVE-2026-33818 in Go.
+  * Remediate CVE-2026-46600 in Go.
+  * Remediate CVE-2026-56862 in Go.
+  * Remediate CVE-2026-56859 in Go.
+  * Remediate CVE-2026-56860 in Go.
+  * Remediate CVE-2026-56858 in Go.
+  * Remediate CVE-2026-56853 in Go.
+  * Remediate CVE-2026-25680 in golang.org/x/net.
+  * Remediate CVE-2026-42506 in golang.org/x/net.
+  * Remediate CVE-2026-42502 in golang.org/x/net.
+  * Remediate CVE-2026-25681 in golang.org/x/net.
+  * Remediate CVE-2026-27136 in golang.org/x/net.
+  * Remediate CVE-2026-46595 by upgrading golang.org/x/crypto to v0.55.0.
+  * Remediate CVE-2026-42508 in golang.org/x/crypto.
+  * Remediate CVE-2026-39834 in golang.org/x/crypto.
+  * Remediate CVE-2026-39833 in golang.org/x/crypto.
+  * Remediate CVE-2026-39832 in golang.org/x/crypto.
+  * Remediate CVE-2026-39831 in golang.org/x/crypto.
+  * Remediate CVE-2026-39830 in golang.org/x/crypto.
+  * Remediate CVE-2026-39829 in golang.org/x/crypto.
+  * Remediate CVE-2026-46597 in golang.org/x/crypto.
+  * Remediate CVE-2026-39828 in golang.org/x/crypto.
+  * Remediate CVE-2026-39827 in golang.org/x/crypto.
+  * Remediate CVE-2026-39835 in golang.org/x/crypto.
+  * Remediate CVE-2026-46598 in golang.org/x/crypto.
+  * Remediate CVE-2025-47914 in golang.org/x/crypto.
+  * Remediate CVE-2025-58181 in golang.org/x/crypto.
+
 ## 1.2.4 (October 30, 2023)
 
 SECURITY:
